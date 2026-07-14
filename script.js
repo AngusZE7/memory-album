@@ -3,14 +3,17 @@ let currentPhotoIndex = 0;
 
 document.addEventListener('DOMContentLoaded', async () => {
   try {
-    const res = await fetch('photos.json');
+    const res = await fetch('photos.json?t=' + Date.now());
     const data = await res.json();
     allPhotos = data.events || [];
     renderStats(data);
     renderTimeline(allPhotos);
     initLightbox();
     initScrollAnimation();
+    console.log('Loaded events:', allPhotos.length);
+    console.log('First event:', allPhotos[0]);
   } catch (err) {
+    console.error('Error loading photos:', err);
     document.getElementById('timeline').innerHTML =
       '<p style="text-align:center;color:#999;padding:40px;">尚無照片資料，請先執行 generate_manifest.py</p>';
   }
@@ -41,7 +44,7 @@ function renderTimeline(events) {
       photosHTML = `
         <div class="event-photos single">
           <div class="photo-wrapper" data-index="0" data-event-id="${event.id}">
-            <img src="${photos[0].url}" alt="${event.title}" loading="lazy">
+            <img src="${photos[0].url}" alt="${event.title}" loading="lazy" onerror="this.style.display='none'; console.log('Image failed:', this.src)">
           </div>
         </div>`;
     } else {
@@ -49,7 +52,7 @@ function renderTimeline(events) {
       photosHTML = `
         <div class="event-photos">
           <div class="photo-wrapper" data-index="0" data-event-id="${event.id}">
-            <img src="${firstPhoto.url}" alt="${event.title}" loading="lazy">
+            <img src="${firstPhoto.url}" alt="${event.title}" loading="lazy" onerror="this.style.display='none'; console.log('Image failed:', this.src)">
             ${photos.length > 1 ? `<span class="photo-count">${photos.length} 張</span>` : ''}
           </div>
         </div>`;
