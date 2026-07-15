@@ -174,12 +174,14 @@ function buildTOC(events) {
 
     const dayNum = dayNumbers[event.id];
     const dayLabel = dayNum ? `Day ${dayNum}` : '';
+    const photoCount = event.photos ? event.photos.length : 0;
+    const photoLabel = photoCount > 1 ? ` \u00B7 ${photoCount} \u5F35` : '';
 
     item.innerHTML = `
       <div class="toc-dot"></div>
       <div class="toc-item-text">
         <div class="toc-item-date">${formatDate(event.date)} ${dayLabel}</div>
-        <div class="toc-item-title">${event.title}</div>
+        <div class="toc-item-title">${event.title}${photoLabel}</div>
       </div>
     `;
 
