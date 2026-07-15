@@ -74,7 +74,7 @@ def list_subfolders(service, folder_id):
 
 
 def get_direct_url(file_id):
-    return f"https://drive.google.com/uc?export=view&id={file_id}"
+    return f"https://lh3.googleusercontent.com/d/{file_id}"
 
 
 def parse_filename(filename):
