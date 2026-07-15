@@ -2,6 +2,7 @@ let allEvents = [];
 let currentPage = 0;
 let totalPages = 0;
 let isAnimating = false;
+let dayNumbers = {};
 
 document.addEventListener('DOMContentLoaded', async () => {
   try {
@@ -9,8 +10,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     const data = await res.json();
     allEvents = data.events || [];
 
+    computeDayNumbers();
     renderStats(data);
     buildPages(allEvents);
+    buildTOC(allEvents);
+    setupParticles();
+    launchConfetti();
     setupNavigation();
     setupKeyboard();
     setupSwipe();
@@ -20,15 +25,29 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 });
 
+/* ===== Day Numbers ===== */
+function computeDayNumbers() {
+  const startDate = new Date('2024-11-14');
+  allEvents.forEach(e => {
+    if (e.date) {
+      const d = new Date(e.date);
+      dayNumbers[e.id] = Math.floor((d - startDate) / 86400000) + 1;
+    }
+  });
+}
+
+/* ===== Stats ===== */
 function renderStats(data) {
   const total = data.total_photos || 0;
   const events = data.events?.length || 0;
   const days = data.total_days || 0;
   document.getElementById('cover-stats').textContent =
     `${total} 張照片 · ${events} 個回憶 · 在一起 ${days} 天`;
-  document.getElementById('back-date').textContent = `記錄到 ${data.generated_at?.split('T')[0] || ''}`;
+  document.getElementById('back-stats').textContent =
+    `${total} 張照片 · ${events} 個回憶 · ${days} 天`;
 }
 
+/* ===== Build Pages ===== */
 function buildPages(events) {
   const container = document.getElementById('pages-container');
   container.innerHTML = '';
@@ -51,37 +70,41 @@ function buildPages(events) {
     const photosHTML = displayPhotos.map((p, idx) => {
       const extra = (idx === displayPhotos.length - 1 && hasMore)
         ? `<div class="photo-more-overlay">+${photos.length - 4}</div>` : '';
-      return `<div class="photo-cell" data-event-idx="${i}" data-photo-idx="${idx}" style="position:relative">
+      return `<div class="photo-cell" data-event-idx="${i}" data-photo-idx="${idx}">
         <img src="${p.url}" alt="" loading="lazy">
         ${extra}
       </div>`;
     }).join('');
 
+    const dayNum = dayNumbers[event.id];
+    const dayBadge = dayNum ? `<span class="page-day-badge">Day ${dayNum}</span>` : '';
+
     page.innerHTML = `
       <div class="page-content">
-        <div class="page-date">${formatDate(event.date)}</div>
+        <div class="page-header">
+          <div class="page-date">${formatDate(event.date)}</div>
+          ${dayBadge}
+        </div>
         <div class="page-title">${event.title}</div>
-        <div class="page-divider"></div>
+        <div class="page-divider"><span>&#10047;</span></div>
         <div class="page-photos ${gridClass}">${photosHTML}</div>
         <div class="page-number">${i + 1}</div>
       </div>
     `;
-
     container.appendChild(page);
   });
 
-  totalPages = events.length + 2; // cover + events + back cover
+  totalPages = events.length + 2;
 }
 
 function formatDate(dateStr) {
   if (!dateStr) return '';
   const parts = dateStr.split('-');
-  if (parts.length === 3) {
-    return `${parts[0]} 年 ${parseInt(parts[1])} 月 ${parseInt(parts[2])} 日`;
-  }
+  if (parts.length === 3) return `${parts[0]} 年 ${parseInt(parts[1])} 月 ${parseInt(parts[2])} 日`;
   return dateStr;
 }
 
+/* ===== Page Navigation ===== */
 function goToPage(page) {
   if (isAnimating) return;
   if (page < 0 || page >= totalPages) return;
@@ -93,160 +116,229 @@ function goToPage(page) {
   const pages = document.querySelectorAll('#pages-container .page');
   const backCover = document.querySelector('.back-cover');
 
-  // Reset all
-  cover.classList.remove('flipped', 'active', 'behind');
+  cover.classList.remove('flipped', 'active', 'behind', 'peeking');
   pages.forEach(p => p.classList.remove('flipped', 'active', 'behind', 'peeking'));
   backCover.classList.remove('flipped', 'active', 'behind');
 
-  // Cover is page 0
   if (page === 0) {
     cover.classList.add('active');
-    // Show next page peeking
     if (pages[0]) pages[0].classList.add('peeking');
   } else {
     cover.classList.add('flipped');
-
-    // Event pages (page 1 to N)
     for (let i = 0; i < pages.length; i++) {
-      const eventPage = i + 1; // page index in totalPages
-      if (eventPage < page) {
-        pages[i].classList.add('flipped');
-      } else if (eventPage === page) {
+      const ep = i + 1;
+      if (ep < page) pages[i].classList.add('flipped');
+      else if (ep === page) {
         pages[i].classList.add('active');
-        // Show next page peeking
         if (pages[i + 1]) pages[i + 1].classList.add('peeking');
-      } else {
-        pages[i].classList.add('behind');
-      }
+      } else pages[i].classList.add('behind');
     }
-
-    // Back cover
-    if (page === totalPages - 1) {
-      backCover.classList.add('active');
-    }
+    if (page === totalPages - 1) backCover.classList.add('active');
   }
 
-  // Update UI
   updateControls();
-
-  setTimeout(() => { isAnimating = false; }, 600);
+  updateTOCActive();
+  setTimeout(() => { isAnimating = false; }, 650);
 }
 
 function updateControls() {
-  const prev = document.getElementById('prev-btn');
-  const next = document.getElementById('next-btn');
-  const indicator = document.getElementById('page-indicator');
+  document.getElementById('prev-btn').disabled = currentPage === 0;
+  document.getElementById('next-btn').disabled = currentPage >= totalPages - 1;
+  document.getElementById('page-indicator').textContent = `${currentPage + 1} / ${totalPages}`;
+  document.getElementById('progress-bar').style.width =
+    `${(currentPage / (totalPages - 1)) * 100}%`;
+
   const hint = document.getElementById('hint');
+  if (currentPage > 0 && hint) hint.style.opacity = '0';
+}
 
-  prev.disabled = currentPage === 0;
-  next.disabled = currentPage >= totalPages - 1;
+/* ===== Table of Contents ===== */
+function buildTOC(events) {
+  const list = document.getElementById('toc-list');
+  list.innerHTML = '';
+  let currentYear = '';
 
-  indicator.textContent = `${currentPage + 1} / ${totalPages}`;
+  events.forEach((event, i) => {
+    const year = event.date ? event.date.split('-')[0] : '';
+    if (year && year !== currentYear) {
+      currentYear = year;
+      const yearEl = document.createElement('div');
+      yearEl.className = 'toc-year';
+      yearEl.textContent = year;
+      list.appendChild(yearEl);
+    }
 
-  if (currentPage > 0 && hint) {
-    hint.style.opacity = '0';
+    const item = document.createElement('div');
+    item.className = 'toc-item';
+    item.dataset.page = i + 1;
+
+    const dayNum = dayNumbers[event.id];
+    const dayLabel = dayNum ? `Day ${dayNum}` : '';
+
+    item.innerHTML = `
+      <div class="toc-dot"></div>
+      <div class="toc-item-text">
+        <div class="toc-item-date">${formatDate(event.date)} ${dayLabel}</div>
+        <div class="toc-item-title">${event.title}</div>
+      </div>
+    `;
+
+    item.addEventListener('click', () => {
+      goToPage(i + 1);
+      closeTOC();
+    });
+
+    list.appendChild(item);
+  });
+}
+
+function updateTOCActive() {
+  document.querySelectorAll('.toc-item').forEach(item => {
+    const p = parseInt(item.dataset.page);
+    item.classList.toggle('active', p === currentPage);
+  });
+  // Scroll active into view
+  const active = document.querySelector('.toc-item.active');
+  if (active) active.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+}
+
+function setupTOC() {
+  document.getElementById('toc-toggle').addEventListener('click', openTOC);
+  document.getElementById('toc-close').addEventListener('click', closeTOC);
+  document.getElementById('toc-overlay').addEventListener('click', closeTOC);
+
+  document.getElementById('toc-search').addEventListener('input', (e) => {
+    const q = e.target.value.toLowerCase();
+    document.querySelectorAll('.toc-item').forEach(item => {
+      const text = item.textContent.toLowerCase();
+      item.style.display = text.includes(q) ? '' : 'none';
+    });
+    // Show/hide year headers
+    document.querySelectorAll('.toc-year').forEach(y => {
+      let next = y.nextElementSibling;
+      let hasVisible = false;
+      while (next && !next.classList.contains('toc-year')) {
+        if (next.style.display !== 'none') hasVisible = true;
+        next = next.nextElementSibling;
+      }
+      y.style.display = hasVisible ? '' : 'none';
+    });
+  });
+}
+
+function openTOC() {
+  document.getElementById('toc').classList.add('active');
+  document.getElementById('toc-overlay').classList.add('active');
+  updateTOCActive();
+}
+
+function closeTOC() {
+  document.getElementById('toc').classList.remove('active');
+  document.getElementById('toc-overlay').classList.remove('active');
+}
+
+/* ===== Particles ===== */
+function setupParticles() {
+  const container = document.getElementById('particles');
+  const symbols = ['&#10047;', '&#10048;', '&#10049;', '&#10084;', '&#9830;', '&#8226;'];
+
+  for (let i = 0; i < 15; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    p.innerHTML = symbols[Math.floor(Math.random() * symbols.length)];
+    p.style.left = Math.random() * 100 + '%';
+    p.style.animationDuration = (12 + Math.random() * 18) + 's';
+    p.style.animationDelay = (Math.random() * 15) + 's';
+    p.style.fontSize = (10 + Math.random() * 10) + 'px';
+    container.appendChild(p);
   }
 }
 
-function setupNavigation() {
-  document.getElementById('prev-btn').addEventListener('click', () => {
-    goToPage(currentPage - 1);
-  });
+/* ===== Confetti ===== */
+function launchConfetti() {
+  const container = document.getElementById('confetti');
+  if (!container) return;
+  const colors = ['#c8856a', '#b8976a', '#e8a090', '#d4a574', '#f0c8a0', '#a07858'];
 
-  document.getElementById('next-btn').addEventListener('click', () => {
-    goToPage(currentPage + 1);
-  });
+  for (let i = 0; i < 40; i++) {
+    const piece = document.createElement('div');
+    piece.className = 'confetti-piece';
+    piece.style.left = Math.random() * 100 + '%';
+    piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+    piece.style.width = (4 + Math.random() * 6) + 'px';
+    piece.style.height = (4 + Math.random() * 6) + 'px';
+    piece.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+    piece.style.animation = `confettiFall ${2 + Math.random() * 3}s ${Math.random() * 2}s ease-out forwards`;
+    container.appendChild(piece);
+  }
+}
+
+/* ===== Navigation ===== */
+function setupNavigation() {
+  document.getElementById('prev-btn').addEventListener('click', () => goToPage(currentPage - 1));
+  document.getElementById('next-btn').addEventListener('click', () => goToPage(currentPage + 1));
+  setupTOC();
 }
 
 function setupKeyboard() {
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
-      goToPage(currentPage + 1);
-    } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
-      goToPage(currentPage - 1);
-    } else if (e.key === 'Escape') {
-      closeLightbox();
+    if (document.getElementById('lightbox').classList.contains('active')) {
+      if (e.key === 'Escape') closeLightbox();
+      return;
     }
+    if (document.getElementById('toc').classList.contains('active')) {
+      if (e.key === 'Escape') closeTOC();
+      return;
+    }
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') goToPage(currentPage + 1);
+    else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') goToPage(currentPage - 1);
   });
 }
 
 function setupSwipe() {
-  let startX = 0;
-  let startY = 0;
-
-  document.addEventListener('touchstart', (e) => {
-    startX = e.touches[0].clientX;
-    startY = e.touches[0].clientY;
-  }, { passive: true });
-
-  document.addEventListener('touchend', (e) => {
-    const dx = e.changedTouches[0].clientX - startX;
-    const dy = e.changedTouches[0].clientY - startY;
-
-    if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 50) {
-      if (dx < 0) {
-        goToPage(currentPage + 1);
-      } else {
-        goToPage(currentPage - 1);
-      }
+  let sx = 0;
+  document.addEventListener('touchstart', e => { sx = e.touches[0].clientX; }, { passive: true });
+  document.addEventListener('touchend', e => {
+    const dx = e.changedTouches[0].clientX - sx;
+    if (Math.abs(dx) > 50) {
+      dx < 0 ? goToPage(currentPage + 1) : goToPage(currentPage - 1);
     }
   }, { passive: true });
 
-  // Click on left/right half of book to flip
   document.querySelector('.book-scene').addEventListener('click', (e) => {
-    if (e.target.closest('.nav-btn') || e.target.closest('.lightbox') || e.target.closest('.page-photos img')) return;
+    if (e.target.closest('.nav-btn') || e.target.closest('.lightbox') || e.target.closest('.toc') || e.target.closest('.toc-toggle')) return;
     const rect = document.querySelector('.book').getBoundingClientRect();
     const x = e.clientX - rect.left;
-    if (x > rect.width / 2) {
-      goToPage(currentPage + 1);
-    } else {
-      goToPage(currentPage - 1);
-    }
+    x > rect.width / 2 ? goToPage(currentPage + 1) : goToPage(currentPage - 1);
   });
 }
 
 /* ===== Lightbox ===== */
-function openLightbox(eventIdx, photoIdx) {
-  const event = allEvents[eventIdx];
-  if (!event) return;
-
-  const lightbox = document.getElementById('lightbox') || createLightbox();
-  const img = lightbox.querySelector('img');
-
-  img.src = event.photos[photoIdx].url;
-  lightbox.classList.add('active');
-  document.body.style.overflow = 'hidden';
-}
-
-function createLightbox() {
-  const lb = document.createElement('div');
-  lb.className = 'lightbox';
-  lb.id = 'lightbox';
-  lb.innerHTML = `
-    <button class="lightbox-close" onclick="closeLightbox()">&times;</button>
-    <img src="" alt="">
-  `;
-  lb.addEventListener('click', (e) => {
-    if (e.target === lb) closeLightbox();
-  });
-  document.body.appendChild(lb);
-  return lb;
-}
-
-function closeLightbox() {
-  const lb = document.getElementById('lightbox');
-  if (lb) {
-    lb.classList.remove('active');
-    document.body.style.overflow = '';
-  }
-}
-
-// Delegate click on photos
 document.addEventListener('click', (e) => {
   const cell = e.target.closest('.photo-cell');
   if (cell) {
-    const eventIdx = parseInt(cell.dataset.eventIdx);
-    const photoIdx = parseInt(cell.dataset.photoIdx);
-    openLightbox(eventIdx, photoIdx);
+    const ei = parseInt(cell.dataset.eventIdx);
+    const pi = parseInt(cell.dataset.photoIdx);
+    openLightbox(ei, pi);
   }
 });
+
+function openLightbox(ei, pi) {
+  const event = allEvents[ei];
+  if (!event) return;
+  const lb = document.getElementById('lightbox');
+  document.getElementById('lightbox-img').src = event.photos[pi].url;
+  document.getElementById('lightbox-caption').textContent =
+    `${event.title} — ${pi + 1} / ${event.photos.length}`;
+  lb.classList.add('active');
+}
+
+function closeLightbox() {
+  document.getElementById('lightbox').classList.remove('active');
+}
+
+document.getElementById('lightbox').addEventListener('click', (e) => {
+  if (e.target.id === 'lightbox' || e.target.id === 'lightbox-content') closeLightbox();
+});
+
+document.getElementById('lightbox-close').addEventListener('click', closeLightbox);
