@@ -428,6 +428,7 @@ body {
   display: flex;
   flex-direction: column;
   position: relative;
+  min-height: 0;
 }
 
 .page-header {
@@ -487,7 +488,6 @@ body {
   display: grid;
   gap: 8px;
   overflow: hidden;
-  align-content: start;
 }
 
 .page-photos img {
@@ -509,14 +509,15 @@ body {
   position: relative;
   overflow: hidden;
   border-radius: 4px;
+  min-height: 0;
 }
 
-.photo-grid-1 { grid-template-columns: 1fr; grid-template-rows: 1fr; }
-.photo-grid-2 { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr; }
-.photo-grid-3 { grid-template-columns: 1fr 1fr; grid-template-rows: 1.2fr 1fr; }
+.photo-grid-1 { grid-template: 1fr / 1fr; }
+.photo-grid-2 { grid-template: 1fr / 1fr 1fr; }
+.photo-grid-3 { grid-template: 1.2fr 1fr / 1fr 1fr; }
 .photo-grid-3 .photo-cell:first-child { grid-column: 1 / -1; }
-.photo-grid-4 { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; }
-.photo-grid-more { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; }
+.photo-grid-4 { grid-template: 1fr 1fr / 1fr 1fr; }
+.photo-grid-more { grid-template: 1fr 1fr / 1fr 1fr; }
 
 .photo-more-overlay {
   position: absolute;
