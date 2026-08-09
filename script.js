@@ -156,7 +156,7 @@ function buildRight(event, i) {
       <div class="event-date">${formatDate(event.date)}</div>
       ${dayBadge}
     </div>
-    <div class="event-title">${event.title}</div>
+    <div class="event-title">${getTitle(event)}</div>
     <div class="event-divider"><span>&#10047;</span></div>
     <div class="event-photos ${gridClass}">${photosHTML}</div>
   `;
@@ -167,6 +167,15 @@ function formatDate(dateStr) {
   const parts = dateStr.split('-');
   if (parts.length === 3) return `${parts[0]} 年 ${parseInt(parts[1])} 月 ${parseInt(parts[2])} 日`;
   return dateStr;
+}
+
+function getTitle(event) {
+  let t = (event.title || '').trim();
+  if (!t || /^\d{4}-\d{2}-\d{2}$/.test(t)) return '【無題】';
+  const m = t.match(/^\d{6,8}[-_](.+)$/);
+  if (m && m[1]) t = m[1].trim();
+  if (!t) return '【無題】';
+  return t;
 }
 
 /* ===== Flip Navigation ===== */
@@ -282,7 +291,7 @@ function buildTOC(events) {
       <div class="toc-dot"></div>
       <div class="toc-item-text">
         <div class="toc-item-date">${formatDate(event.date)} ${dayLabel}</div>
-        <div class="toc-item-title">${event.title}${photoLabel}</div>
+        <div class="toc-item-title">${getTitle(event)}${photoLabel}</div>
       </div>
     `;
 
@@ -429,7 +438,7 @@ function openLightbox(ei, pi) {
   if (!event) return;
   lbPhotos = event.photos.map((p, i) => ({
     url: p.url,
-    label: `${event.title} — ${i + 1} / ${event.photos.length}`
+    label: `${getTitle(event)} — ${i + 1} / ${event.photos.length}`
   }));
   lbIndex = Math.min(pi, lbPhotos.length - 1);
   showLightbox();
