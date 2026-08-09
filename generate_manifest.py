@@ -127,7 +127,9 @@ def build_manifest(service, folder_id):
             key = 'unknown'
 
         if key not in date_groups:
-            date_groups[key] = {'title': desc or date_str or f['name'], 'photos': []}
+            # 無法解析日期的照片集中成一個「special」事件
+            title = '【special】' if key == 'unknown' else (desc or date_str)
+            date_groups[key] = {'title': title, 'photos': []}
 
         date_groups[key]['photos'].append({
             'id': f['id'],
@@ -170,11 +172,12 @@ def build_manifest(service, folder_id):
         events.append({
             'id': f"event_{date_str or folder_name}_{len(events)}",
             'date': date_str or '',
-            'title': desc or folder_name,
+            # 無法從資料夾名解析日期的，標題改為「special」
+            'title': '【special】' if not date_str else (desc or folder_name),
             'photos': photos
         })
 
-    # 按日期排序
+    # 按日期排序（沒有日期的排在最後面）
     events.sort(key=lambda e: e['date'] or '9999')
 
     # 計算在一起的天數（以交往紀念日為基準）
