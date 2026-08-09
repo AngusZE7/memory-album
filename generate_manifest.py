@@ -185,16 +185,34 @@ def build_manifest(service, folder_id):
             'photos': photos
         })
 
-    # 按日期排序（沒有日期的排在最後面）
-    events.sort(key=lambda e: e['date'] or '9999')
+    # 3. 分類：有日期的照日期排序；沒日期的 special 有標題在前、沒標題在後
+    dated = [e for e in events if e['date']]
+    titled_special = [e for e in events if not e['date'] and e['title'] != '【special】']
+    untitled_special = [e for e in events if not e['date'] and e['title'] == '【special】']
 
-    # 沒有文字的 special 事件加上編號
-    special_n = 0
-    for e in events:
-        if not e['date']:
-            special_n += 1
-            if e['title'] == '【special】':
-                e['title'] = f'【special】 {special_n}'
+    dated.sort(key=lambda e: e['date'])
+
+    # 沒標題的一頁最多 12 張，超過就拆成多頁
+    split_special = []
+    for e in untitled_special:
+        photos = e['photos']
+        for i in range(0, len(photos), 12):
+            split_special.append({
+                'id': f"{e['id']}_p{len(split_special) + 1}",
+                'date': '永遠',
+                'title': '【special】',
+                'photos': photos[i:i + 12]
+            })
+
+    # 沒標題的加上編號
+    for n, e in enumerate(split_special, 1):
+        e['title'] = f'【special】 {n}'
+
+    # 沒日期的日期標示都是「永遠」
+    for e in titled_special:
+        e['date'] = '永遠'
+
+    events = dated + titled_special + split_special
 
     # 計算在一起的天數（以交往紀念日為基準）
     total_days = 0
