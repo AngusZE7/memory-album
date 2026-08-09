@@ -181,7 +181,8 @@ def build_manifest(service, folder_id):
     total_days = 0
     try:
         anniv = datetime.strptime(ANNIVERSARY, '%Y-%m-%d').date()
-        total_days = (date.today() - anniv).days
+        # +1 表示含交往當天（第 1 天）
+        total_days = (date.today() - anniv).days + 1
     except ValueError:
         print(f"[WARN] 無法解析 ANNIVERSARY: {ANNIVERSARY}")
 
