@@ -396,7 +396,7 @@ function updateTOCActive() {
   });
   const active = document.querySelector('.toc-item.active');
   if (active && document.getElementById('toc').classList.contains('active')) {
-    active.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    active.scrollIntoView({ block: 'nearest' });
   }
 }
 

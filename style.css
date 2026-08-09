@@ -49,12 +49,11 @@ body {
 .toc-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.4);
+  background: rgba(0,0,0,0.45);
   z-index: 500;
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.3s;
-  backdrop-filter: blur(4px);
 }
 .toc-overlay.active { opacity: 1; pointer-events: auto; }
 
