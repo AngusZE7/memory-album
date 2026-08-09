@@ -28,6 +28,12 @@ SCOPES = ['https://www.googleapis.com/auth/drive.readonly']
 # ═══════════════════════════════════════════
 FOLDER_ID = '1PEQnVDRPRj4Uxb79daN8crnfnF2kTM4j'
 
+# ═══════════════════════════════════════════
+# 交往紀念日（在一起的第一天）
+# 用這個日期當基準來計算「在一起的天數」
+# ═══════════════════════════════════════════
+ANNIVERSARY = '2024-11-14'
+
 
 def get_credentials():
     creds = None
@@ -171,19 +177,13 @@ def build_manifest(service, folder_id):
     # 按日期排序
     events.sort(key=lambda e: e['date'] or '9999')
 
-    # 計算在一起的天數
-    first_date = None
-    for e in events:
-        if e['date']:
-            try:
-                first_date = datetime.strptime(e['date'], '%Y-%m-%d').date()
-                break
-            except ValueError:
-                pass
-
+    # 計算在一起的天數（以交往紀念日為基準）
     total_days = 0
-    if first_date:
-        total_days = (date.today() - first_date).days
+    try:
+        anniv = datetime.strptime(ANNIVERSARY, '%Y-%m-%d').date()
+        total_days = (date.today() - anniv).days
+    except ValueError:
+        print(f"[WARN] 無法解析 ANNIVERSARY: {ANNIVERSARY}")
 
     manifest = {
         'generated_at': datetime.now().isoformat(),
