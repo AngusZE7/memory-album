@@ -1,7 +1,8 @@
 let allEvents = [];
-let currentPage = 0;
-let totalPages = 0;
-let isAnimating = false;
+let sheets = [];
+let current = 0;       // index of sheet currently on the right (front facing)
+let total = 0;
+let flipping = false;
 let dayNumbers = {};
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -11,15 +12,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     allEvents = data.events || [];
 
     computeDayNumbers();
-    renderStats(data);
-    buildPages(allEvents);
-    buildTOC(allEvents);
+    buildSheets(data);
     setupParticles();
     launchConfetti();
     setupNavigation();
     setupKeyboard();
     setupSwipe();
-    goToPage(0);
+    updateUI();
   } catch (err) {
     console.error('Error:', err);
   }
@@ -36,59 +35,114 @@ function computeDayNumbers() {
   });
 }
 
-/* ===== Stats ===== */
-function renderStats(data) {
-  const total = data.total_photos || 0;
-  const events = data.events?.length || 0;
-  const days = data.total_days || 0;
-  document.getElementById('cover-stats').textContent =
-    `${total} 張照片 · ${events} 個回憶 · 在一起 ${days} 天`;
-  document.getElementById('back-stats').textContent =
-    `${total} 張照片 · ${events} 個回憶 · ${days} 天`;
-}
-
-/* ===== Build Pages ===== */
-function buildPages(events) {
-  const container = document.getElementById('pages-container');
+/* ===== Build Sheets ===== */
+function buildSheets(data) {
+  const container = document.getElementById('sheets-container');
   container.innerHTML = '';
 
-  events.forEach((event, i) => {
-    const page = document.createElement('div');
-    page.className = 'page';
-    page.dataset.index = i;
+  // Sheet 0: cover
+  const coverSheet = document.createElement('div');
+  coverSheet.className = 'sheet';
+  coverSheet.dataset.sheet = 0;
+  coverSheet.innerHTML = `
+    <div class="sheet-front cover-front">
+      <div class="cover-deco-top">&#10047; &#10047; &#10047;</div>
+      <div class="cover-frame">
+        <h1 class="cover-title">我們的<br>回憶錄</h1>
+        <div class="cover-line"></div>
+        <p class="cover-subtitle">從那天開始的每一天</p>
+        <div class="cover-stats" id="cover-stats"></div>
+      </div>
+      <div class="cover-deco-bottom"><span>&#10084;</span></div>
+      <div class="confetti-container" id="confetti"></div>
+    </div>
+    <div class="sheet-back inner-cover">
+      <span class="inner-text">&#10047; 我們的回憶 &#10047;</span>
+    </div>
+  `;
+  container.appendChild(coverSheet);
+  sheets.push(coverSheet);
 
-    const photos = event.photos || [];
-    const gridClass = photos.length <= 1 ? 'photo-grid-1'
-      : photos.length <= 2 ? 'photo-grid-2'
-      : photos.length <= 3 ? 'photo-grid-3'
-      : photos.length <= 4 ? 'photo-grid-4'
-      : 'photo-grid-more';
+  // Event sheets (1..N)
+  allEvents.forEach((event, i) => {
+    const sheet = document.createElement('div');
+    sheet.className = 'sheet';
+    sheet.dataset.sheet = i + 1;
 
-    const photosHTML = photos.map((p, idx) => {
-      return `<div class="photo-cell" data-event-idx="${i}" data-photo-idx="${idx}">
-        <img src="${p.url}" alt="" loading="lazy">
-      </div>`;
-    }).join('');
-
-    const dayNum = dayNumbers[event.id];
-    const dayBadge = dayNum ? `<span class="page-day-badge">Day ${dayNum}</span>` : '';
-
-    page.innerHTML = `
-      <div class="page-content">
-        <div class="page-header">
-          <div class="page-date">${formatDate(event.date)}</div>
-          ${dayBadge}
-        </div>
-        <div class="page-title">${event.title}</div>
-        <div class="page-divider"><span>&#10047;</span></div>
-        <div class="page-photos ${gridClass}">${photosHTML}</div>
-        <div class="page-number">${i + 1}</div>
+    sheet.innerHTML = `
+      <div class="sheet-front event-page">
+        ${buildEventContent(event, i)}
+      </div>
+      <div class="sheet-back divider-page">
+        <div class="divider-deco">&#10047;</div>
+        <div class="divider-date">${formatDate(event.date)}</div>
+        ${dayNumbers[event.id] ? `<div class="divider-day">Day ${dayNumbers[event.id]}</div>` : ''}
       </div>
     `;
-    container.appendChild(page);
+
+    container.appendChild(sheet);
+    sheets.push(sheet);
   });
 
-  totalPages = events.length + 2;
+  // Last sheet: back cover
+  const backSheet = document.createElement('div');
+  backSheet.className = 'sheet';
+  backSheet.dataset.sheet = allEvents.length + 1;
+  backSheet.innerHTML = `
+    <div class="sheet-front back-cover-front">
+      <div class="back-deco">&#10047;</div>
+      <p class="back-text">未完待續...</p>
+      <p class="back-sub">每一天都是新的回憶</p>
+      <div class="back-stats" id="back-stats"></div>
+      <div class="back-hearts"><span>&#10084;</span><span>&#10084;</span><span>&#10084;</span></div>
+    </div>
+    <div class="sheet-back inner-cover">
+      <span class="inner-text">&#10084;</span>
+    </div>
+  `;
+  container.appendChild(backSheet);
+  sheets.push(backSheet);
+
+  total = sheets.length;
+
+  // Stats
+  document.getElementById('cover-stats').textContent =
+    `${data.total_photos || 0} 張照片 · ${allEvents.length} 個回憶 · ${data.total_days || 0} 天`;
+  document.getElementById('back-stats').textContent =
+    `${data.total_photos || 0} 張照片 · ${allEvents.length} 個回憶 · ${data.total_days || 0} 天`;
+
+  buildTOC(allEvents);
+
+  // Init z-index
+  sheets.forEach((s, i) => { s.style.zIndex = 10; });
+  sheets[0].style.zIndex = 30;
+}
+
+function buildEventContent(event, i) {
+  const photos = event.photos || [];
+  const gridClass = photos.length <= 1 ? 'photo-grid-1'
+    : photos.length <= 2 ? 'photo-grid-2'
+    : photos.length <= 3 ? 'photo-grid-3'
+    : photos.length <= 4 ? 'photo-grid-4'
+    : 'photo-grid-more';
+
+  const photosHTML = photos.map((p, idx) => {
+    return `<div class="photo-cell" data-event-idx="${i}" data-photo-idx="${idx}">
+      <img src="${p.url}" alt="" loading="lazy">
+    </div>`;
+  }).join('');
+
+  const dayBadge = dayNumbers[event.id] ? `<span class="event-day-badge">Day ${dayNumbers[event.id]}</span>` : '';
+
+  return `
+    <div class="event-header">
+      <div class="event-date">${formatDate(event.date)}</div>
+      ${dayBadge}
+    </div>
+    <div class="event-title">${event.title}</div>
+    <div class="event-divider"><span>&#10047;</span></div>
+    <div class="event-photos ${gridClass}">${photosHTML}</div>
+  `;
 }
 
 function formatDate(dateStr) {
@@ -98,55 +152,97 @@ function formatDate(dateStr) {
   return dateStr;
 }
 
-/* ===== Page Navigation ===== */
-function goToPage(page) {
-  if (isAnimating) return;
-  if (page < 0 || page >= totalPages) return;
+/* ===== Flip Navigation ===== */
+function flipForward() {
+  if (flipping || current >= total - 1) return;
+  flipping = true;
 
-  isAnimating = true;
-  currentPage = page;
+  const sheet = sheets[current];
+  sheet.style.zIndex = 40;               // on top during animation
+  sheet.classList.add('flipped');
 
-  const cover = document.getElementById('cover');
-  const pages = document.querySelectorAll('#pages-container .page');
-  const backCover = document.querySelector('.back-cover');
+  const next = current + 1;
+  sheets[next].style.zIndex = 30;        // revealed sheet beneath the flipping one
 
-  cover.classList.remove('flipped', 'active', 'behind', 'peeking');
-  pages.forEach(p => p.classList.remove('flipped', 'active', 'behind', 'peeking'));
-  backCover.classList.remove('flipped', 'active', 'behind');
+  sheet.addEventListener('transitionend', function handler(e) {
+    if (e.propertyName !== 'transform') return;
+    sheet.removeEventListener('transitionend', handler);
+    sheet.style.zIndex = 20;             // landed on the left stack
+    if (current - 1 >= 0) sheets[current - 1].style.zIndex = 10;
+    flipping = false;
+  });
 
-  if (page === 0) {
-    cover.classList.add('active');
-    if (pages[0]) pages[0].classList.add('peeking');
-  } else {
-    cover.classList.add('flipped');
-    for (let i = 0; i < pages.length; i++) {
-      const ep = i + 1;
-      if (ep < page) pages[i].classList.add('flipped');
-      else if (ep === page) {
-        pages[i].classList.add('active');
-        if (pages[i + 1]) pages[i + 1].classList.add('peeking');
-      } else pages[i].classList.add('behind');
-    }
-    if (page === totalPages - 1) backCover.classList.add('active');
-  }
-
-  updateControls();
-  updateTOCActive();
-  setTimeout(() => { isAnimating = false; }, 650);
+  current = next;
+  updateUI();
 }
 
-function updateControls() {
-  document.getElementById('prev-btn').disabled = currentPage === 0;
-  document.getElementById('next-btn').disabled = currentPage >= totalPages - 1;
-  document.getElementById('page-indicator').textContent = `${currentPage + 1} / ${totalPages}`;
+function flipBack() {
+  if (flipping || current <= 0) return;
+  flipping = true;
+
+  const prev = current - 1;
+  const sheet = sheets[prev];
+  sheet.style.zIndex = 40;               // on top during animation
+  sheet.classList.remove('flipped');
+
+  sheets[current].style.zIndex = 20;
+
+  sheet.addEventListener('transitionend', function handler(e) {
+    if (e.propertyName !== 'transform') return;
+    sheet.removeEventListener('transitionend', handler);
+    sheet.style.zIndex = 30;             // back on the right
+    flipping = false;
+  });
+
+  current = prev;
+  updateUI();
+}
+
+function jumpTo(target) {
+  if (target < 0 || target >= total) return;
+  if (flipping) return;
+
+  // Disable transitions for instant jump
+  sheets.forEach(s => s.style.transition = 'none');
+
+  for (let i = 0; i < total; i++) {
+    if (i < target) sheets[i].classList.add('flipped');
+    else sheets[i].classList.remove('flipped');
+  }
+  current = target;
+
+  // Z-index
+  sheets.forEach((s, i) => {
+    if (i < target - 1) s.style.zIndex = 10;
+    else if (i === target - 1) s.style.zIndex = 20;
+    else if (i === target) s.style.zIndex = 30;
+    else s.style.zIndex = 10;
+  });
+
+  // Re-enable transitions
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      sheets.forEach(s => s.style.transition = '');
+    });
+  });
+
+  updateUI();
+}
+
+function updateUI() {
+  document.getElementById('prev-btn').disabled = current === 0;
+  document.getElementById('next-btn').disabled = current >= total - 1;
+  document.getElementById('page-indicator').textContent = `${current + 1} / ${total}`;
   document.getElementById('progress-bar').style.width =
-    `${(currentPage / (totalPages - 1)) * 100}%`;
+    `${(current / (total - 1)) * 100}%`;
 
   const hint = document.getElementById('hint');
-  if (currentPage > 0 && hint) hint.style.opacity = '0';
+  if (current > 0 && hint) hint.style.opacity = '0';
+
+  updateTOCActive();
 }
 
-/* ===== Table of Contents ===== */
+/* ===== TOC ===== */
 function buildTOC(events) {
   const list = document.getElementById('toc-list');
   list.innerHTML = '';
@@ -164,12 +260,12 @@ function buildTOC(events) {
 
     const item = document.createElement('div');
     item.className = 'toc-item';
-    item.dataset.page = i + 1;
+    item.dataset.sheet = i + 1; // event sheet index
 
     const dayNum = dayNumbers[event.id];
     const dayLabel = dayNum ? `Day ${dayNum}` : '';
     const photoCount = event.photos ? event.photos.length : 0;
-    const photoLabel = photoCount > 1 ? ` \u00B7 ${photoCount} \u5F35` : '';
+    const photoLabel = photoCount > 1 ? ` · ${photoCount} 張` : '';
 
     item.innerHTML = `
       <div class="toc-dot"></div>
@@ -180,7 +276,7 @@ function buildTOC(events) {
     `;
 
     item.addEventListener('click', () => {
-      goToPage(i + 1);
+      jumpTo(i + 1);
       closeTOC();
     });
 
@@ -190,12 +286,13 @@ function buildTOC(events) {
 
 function updateTOCActive() {
   document.querySelectorAll('.toc-item').forEach(item => {
-    const p = parseInt(item.dataset.page);
-    item.classList.toggle('active', p === currentPage);
+    const s = parseInt(item.dataset.sheet);
+    item.classList.toggle('active', s === current);
   });
-  // Scroll active into view
   const active = document.querySelector('.toc-item.active');
-  if (active) active.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  if (active && document.getElementById('toc').classList.contains('active')) {
+    active.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  }
 }
 
 function setupTOC() {
@@ -206,10 +303,8 @@ function setupTOC() {
   document.getElementById('toc-search').addEventListener('input', (e) => {
     const q = e.target.value.toLowerCase();
     document.querySelectorAll('.toc-item').forEach(item => {
-      const text = item.textContent.toLowerCase();
-      item.style.display = text.includes(q) ? '' : 'none';
+      item.style.display = item.textContent.toLowerCase().includes(q) ? '' : 'none';
     });
-    // Show/hide year headers
     document.querySelectorAll('.toc-year').forEach(y => {
       let next = y.nextElementSibling;
       let hasVisible = false;
@@ -227,17 +322,15 @@ function openTOC() {
   document.getElementById('toc-overlay').classList.add('active');
   updateTOCActive();
 }
-
 function closeTOC() {
   document.getElementById('toc').classList.remove('active');
   document.getElementById('toc-overlay').classList.remove('active');
 }
 
-/* ===== Particles ===== */
+/* ===== Particles & Confetti ===== */
 function setupParticles() {
   const container = document.getElementById('particles');
-  const symbols = ['&#10047;', '&#10048;', '&#10049;', '&#10084;', '&#9830;', '&#8226;'];
-
+  const symbols = ['&#10047;', '&#10048;', '&#10084;', '&#9830;', '&#8226;'];
   for (let i = 0; i < 15; i++) {
     const p = document.createElement('div');
     p.className = 'particle';
@@ -250,12 +343,10 @@ function setupParticles() {
   }
 }
 
-/* ===== Confetti ===== */
 function launchConfetti() {
   const container = document.getElementById('confetti');
   if (!container) return;
   const colors = ['#c8856a', '#b8976a', '#e8a090', '#d4a574', '#f0c8a0', '#a07858'];
-
   for (let i = 0; i < 40; i++) {
     const piece = document.createElement('div');
     piece.className = 'confetti-piece';
@@ -269,10 +360,10 @@ function launchConfetti() {
   }
 }
 
-/* ===== Navigation ===== */
+/* ===== Navigation setup ===== */
 function setupNavigation() {
-  document.getElementById('prev-btn').addEventListener('click', () => goToPage(currentPage - 1));
-  document.getElementById('next-btn').addEventListener('click', () => goToPage(currentPage + 1));
+  document.getElementById('prev-btn').addEventListener('click', flipBack);
+  document.getElementById('next-btn').addEventListener('click', flipForward);
   setupTOC();
 }
 
@@ -286,8 +377,8 @@ function setupKeyboard() {
       if (e.key === 'Escape') closeTOC();
       return;
     }
-    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') goToPage(currentPage + 1);
-    else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') goToPage(currentPage - 1);
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') flipForward();
+    else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') flipBack();
   });
 }
 
@@ -297,15 +388,16 @@ function setupSwipe() {
   document.addEventListener('touchend', e => {
     const dx = e.changedTouches[0].clientX - sx;
     if (Math.abs(dx) > 50) {
-      dx < 0 ? goToPage(currentPage + 1) : goToPage(currentPage - 1);
+      dx < 0 ? flipForward() : flipBack();
     }
   }, { passive: true });
 
   document.querySelector('.book-scene').addEventListener('click', (e) => {
-    if (e.target.closest('.nav-btn') || e.target.closest('.lightbox') || e.target.closest('.toc') || e.target.closest('.toc-toggle')) return;
+    if (e.target.closest('.nav-btn') || e.target.closest('.lightbox') ||
+        e.target.closest('.toc') || e.target.closest('.toc-toggle') || e.target.closest('.photo-cell')) return;
     const rect = document.querySelector('.book').getBoundingClientRect();
     const x = e.clientX - rect.left;
-    x > rect.width / 2 ? goToPage(currentPage + 1) : goToPage(currentPage - 1);
+    x > rect.width / 2 ? flipForward() : flipBack();
   });
 }
 
@@ -336,5 +428,4 @@ function closeLightbox() {
 document.getElementById('lightbox').addEventListener('click', (e) => {
   if (e.target.id === 'lightbox' || e.target.id === 'lightbox-content') closeLightbox();
 });
-
 document.getElementById('lightbox-close').addEventListener('click', closeLightbox);
