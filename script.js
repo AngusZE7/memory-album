@@ -207,7 +207,7 @@ function buildRight(event, i) {
 
   const photosHTML = photos.map((p, idx) => {
     return `<div class="photo-cell" data-event-idx="${i}" data-photo-idx="${idx}">
-      <img src="${p.url}" alt="" loading="lazy">
+      <div class="photo-ph"></div>
     </div>`;
   }).join('');
 
@@ -238,6 +238,28 @@ function getTitle(event) {
   if (m && m[1]) t = m[1].trim();
   if (!t) return '【無題】';
   return t;
+}
+
+/* ===== Photo virtualization =====
+ * 只載入目前書頁附近的照片，其餘用佔位，減少卡頓
+ */
+function syncImages() {
+  document.querySelectorAll('.sheet').forEach((sheet, idx) => {
+    const near = Math.abs(idx - current) <= 1;
+    const cells = sheet.querySelectorAll('.photo-cell');
+    cells.forEach(cell => {
+      if (near) {
+        if (!cell.querySelector('img')) {
+          const ev = allEvents[cell.dataset.eventIdx];
+          const ph = ev && ev.photos[cell.dataset.photoIdx];
+          if (ph) cell.innerHTML = `<img src="${ph.url}" alt="" loading="lazy" decoding="async">`;
+        }
+      } else {
+        const img = cell.querySelector('img');
+        if (img) cell.innerHTML = '';
+      }
+    });
+  });
 }
 
 /* ===== Flip Navigation ===== */
@@ -321,6 +343,7 @@ function updateUI() {
   const hint = document.getElementById('hint');
   if (current > 0 && hint) hint.style.opacity = '0';
 
+  syncImages();
   updateTOCActive();
 }
 
