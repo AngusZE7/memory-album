@@ -94,7 +94,7 @@ function buildSheets(data) {
       : buildRight(allEvents[j - 2], j - 2);
 
     const back = j === N + 1
-      ? `<div class="sheet-back inner-cover"><span class="inner-text">&#10084;</span></div>`
+      ? buildLastLeft()
       : buildLeft(allEvents[j - 1], j - 1);
 
     sheet.innerHTML = `
@@ -131,6 +131,21 @@ function buildSheets(data) {
 
   sheets.forEach((s, i) => { s.style.zIndex = 10; });
   sheets[0].style.zIndex = 30;
+}
+
+function buildLastLeft() {
+  const now = new Date();
+  return `
+    <div class="sheet-back last-left">
+      <div class="last-deco">&#10084;</div>
+      <p class="last-label">今天</p>
+      <p class="last-date">${now.getFullYear()} 年 ${now.getMonth() + 1} 月 ${now.getDate()} 日</p>
+      <div class="last-divider"></div>
+      <p class="last-label">我們已經在一起</p>
+      <p class="last-days">${daysTogether()} 天</p>
+      <p class="last-sub">未完待續...</p>
+    </div>
+  `;
 }
 
 function buildIntroLeft() {
