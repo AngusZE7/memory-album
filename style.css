@@ -363,40 +363,68 @@ body {
   letter-spacing: 0.3em;
 }
 
-/* ===== Divider (event back) ===== */
-.divider-page {
+/* ===== Event LEFT page (title page) ===== */
+.event-left {
   width: 100%; height: 100%;
+  padding: 40px 30px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
   background: linear-gradient(165deg, #faf3e8 0%, #f2e2cd 100%);
   position: relative;
   overflow: hidden;
 }
-.divider-page::before {
+.event-left::before {
   content: '';
   position: absolute;
-  inset: 24px;
+  inset: 22px;
   border: 1px solid rgba(180,140,100,0.2);
   border-radius: 4px;
+  pointer-events: none;
 }
-.divider-deco { font-size: 1.6rem; color: rgba(200,133,106,0.3); margin-bottom: 14px; }
-.divider-date {
-  font-family: 'Noto Serif TC', serif;
+.event-left-deco {
   font-size: 1.5rem;
-  color: var(--text);
-  letter-spacing: 0.15em;
-  font-weight: 600;
+  color: rgba(200,133,106,0.3);
+  margin-top: 30px;
 }
-.divider-day {
+.event-left .event-date {
+  margin-top: 18px;
+  font-size: 0.9rem;
+}
+.event-left .event-day-badge {
+  margin-top: 8px;
+}
+.event-left .event-title {
+  margin-top: 14px;
+  font-size: 1.4rem;
+  text-align: center;
+  line-height: 1.5;
+}
+.event-left-count {
   margin-top: 10px;
-  font-size: 0.8rem;
-  color: var(--gold);
-  letter-spacing: 0.1em;
+  font-size: 0.75rem;
+  color: var(--text-light);
+  letter-spacing: 0.05em;
+}
+.event-left-photo {
+  flex: 1;
+  width: 100%;
+  margin-top: 16px;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: 4px;
+  background: #efe9df;
+}
+.event-left-photo img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
 }
 
-/* ===== Event page (front) ===== */
+/* ===== Event page (right, front) ===== */
 .event-page {
   width: 100%; height: 100%;
   padding: 34px 28px 30px 24px;
@@ -484,11 +512,11 @@ body {
 }
 
 .photo-grid-1 .photo-cell { width: 100%; height: 420px; }
-.photo-grid-2 .photo-cell { width: calc(50% - 4px); height: 240px; }
-.photo-grid-3 .photo-cell { width: calc(50% - 4px); height: 180px; }
+.photo-grid-2 .photo-cell { width: calc(50% - 4px); height: 250px; }
+.photo-grid-3 .photo-cell { width: calc(33.333% - 6px); height: 180px; }
 .photo-grid-3 .photo-cell:first-child { width: 100%; height: 260px; }
-.photo-grid-4 .photo-cell,
-.photo-grid-more .photo-cell { width: calc(50% - 4px); height: 200px; }
+.photo-grid-4 .photo-cell { width: calc(50% - 4px); height: 190px; }
+.photo-grid-more .photo-cell { width: calc(33.333% - 6px); height: 150px; }
 
 .photo-cell-more {
   position: absolute;
@@ -624,6 +652,27 @@ body {
 }
 .lightbox-close:hover { color: white; }
 
+.lightbox-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.15);
+  color: rgba(255,255,255,0.7);
+  width: 46px; height: 46px;
+  border-radius: 50%;
+  font-size: 1.2rem;
+  cursor: pointer;
+  z-index: 1001;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+.lightbox-nav:hover { background: rgba(255,255,255,0.2); color: white; }
+.lb-prev { left: 16px; }
+.lb-next { right: 16px; }
+
 /* ===== Responsive ===== */
 @media (max-width: 700px) {
   .book { width: 96vw; height: 70vh; }
@@ -631,13 +680,18 @@ body {
   .cover-frame { padding: 35px 25px; }
   .event-page { padding: 24px 14px 28px 12px; }
   .event-title { font-size: 1.05rem; }
+  .event-left { padding: 24px 16px; }
+  .event-left .event-title { font-size: 1.1rem; }
   .photo-grid-1 .photo-cell { height: 300px; }
-  .photo-grid-2 .photo-cell { height: 160px; }
-  .photo-grid-3 .photo-cell { height: 120px; }
+  .photo-grid-2 .photo-cell { height: 170px; }
+  .photo-grid-3 .photo-cell { height: 110px; }
   .photo-grid-3 .photo-cell:first-child { height: 170px; }
-  .photo-grid-4 .photo-cell,
-  .photo-grid-more .photo-cell { height: 140px; }
+  .photo-grid-4 .photo-cell { height: 130px; }
+  .photo-grid-more .photo-cell { height: 100px; }
   .toc-toggle { top: 10px; left: 10px; padding: 6px 10px; font-size: 0.8rem; }
   .nav-btn { width: 36px; height: 36px; font-size: 0.9rem; }
   .nav-bar { padding: 8px 14px; gap: 10px; }
+  .lightbox-nav { width: 36px; height: 36px; font-size: 1rem; }
+  .lb-prev { left: 8px; }
+  .lb-next { right: 8px; }
 }

@@ -1,9 +1,12 @@
 let allEvents = [];
 let sheets = [];
-let current = 0;       // index of sheet currently on the right (front facing)
+let current = 0;
 let total = 0;
 let flipping = false;
 let dayNumbers = {};
+
+let lbPhotos = [];
+let lbIndex = 0;
 
 document.addEventListener('DOMContentLoaded', async () => {
   try {
@@ -18,13 +21,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     setupNavigation();
     setupKeyboard();
     setupSwipe();
+    setupLightbox();
     updateUI();
   } catch (err) {
     console.error('Error:', err);
   }
 });
 
-/* ===== Day Numbers ===== */
 function computeDayNumbers() {
   const startDate = new Date('2024-11-14');
   allEvents.forEach(e => {
@@ -35,15 +38,25 @@ function computeDayNumbers() {
   });
 }
 
-/* ===== Build Sheets ===== */
+/* ===== Sheet structure =====
+ * Each event spans a full spread (left + right pages).
+ *  sheet 0:       front = cover,          back = event 1 LEFT
+ *  sheet j (1..N-1): front = event j RIGHT, back = event j+1 LEFT
+ *  sheet N:       front = event N RIGHT,  back = blank
+ *  sheet N+1:     front = back cover,     back = blank
+ *  current = k (1..N): left shows event k LEFT, right shows event k RIGHT
+ */
 function buildSheets(data) {
   const container = document.getElementById('sheets-container');
   container.innerHTML = '';
+  sheets = [];
+
+  const N = allEvents.length;
+  const INNER = `<div class="sheet-back inner-cover"><span class="inner-text">&#10047; 我們的回憶 &#10047;</span></div>`;
 
   // Sheet 0: cover
   const coverSheet = document.createElement('div');
   coverSheet.className = 'sheet';
-  coverSheet.dataset.sheet = 0;
   coverSheet.innerHTML = `
     <div class="sheet-front cover-front">
       <div class="cover-deco-top">&#10047; &#10047; &#10047;</div>
@@ -56,38 +69,32 @@ function buildSheets(data) {
       <div class="cover-deco-bottom"><span>&#10084;</span></div>
       <div class="confetti-container" id="confetti"></div>
     </div>
-    <div class="sheet-back inner-cover">
-      <span class="inner-text">&#10047; 我們的回憶 &#10047;</span>
-    </div>
+    ${N > 0 ? buildLeft(allEvents[0], 0) : INNER}
   `;
   container.appendChild(coverSheet);
   sheets.push(coverSheet);
 
-  // Event sheets (1..N)
-  allEvents.forEach((event, i) => {
+  // Sheets 1..N
+  for (let j = 1; j <= N; j++) {
     const sheet = document.createElement('div');
     sheet.className = 'sheet';
-    sheet.dataset.sheet = i + 1;
+
+    const front = buildRight(allEvents[j - 1], j - 1);
+    const back = j === N
+      ? `<div class="sheet-back inner-cover"><span class="inner-text">&#10084;</span></div>`
+      : buildLeft(allEvents[j], j);
 
     sheet.innerHTML = `
-      <div class="sheet-front event-page">
-        ${buildEventContent(event, i)}
-      </div>
-      <div class="sheet-back divider-page">
-        <div class="divider-deco">&#10047;</div>
-        <div class="divider-date">${formatDate(event.date)}</div>
-        ${dayNumbers[event.id] ? `<div class="divider-day">Day ${dayNumbers[event.id]}</div>` : ''}
-      </div>
+      <div class="sheet-front event-page">${front}</div>
+      ${back}
     `;
-
     container.appendChild(sheet);
     sheets.push(sheet);
-  });
+  }
 
-  // Last sheet: back cover
+  // Back cover sheet
   const backSheet = document.createElement('div');
   backSheet.className = 'sheet';
-  backSheet.dataset.sheet = allEvents.length + 1;
   backSheet.innerHTML = `
     <div class="sheet-front back-cover-front">
       <div class="back-deco">&#10047;</div>
@@ -96,16 +103,13 @@ function buildSheets(data) {
       <div class="back-stats" id="back-stats"></div>
       <div class="back-hearts"><span>&#10084;</span><span>&#10084;</span><span>&#10084;</span></div>
     </div>
-    <div class="sheet-back inner-cover">
-      <span class="inner-text">&#10084;</span>
-    </div>
+    ${INNER}
   `;
   container.appendChild(backSheet);
   sheets.push(backSheet);
 
   total = sheets.length;
 
-  // Stats
   document.getElementById('cover-stats').textContent =
     `${data.total_photos || 0} 張照片 · ${allEvents.length} 個回憶 · ${data.total_days || 0} 天`;
   document.getElementById('back-stats').textContent =
@@ -113,12 +117,30 @@ function buildSheets(data) {
 
   buildTOC(allEvents);
 
-  // Init z-index
   sheets.forEach((s, i) => { s.style.zIndex = 10; });
   sheets[0].style.zIndex = 30;
 }
 
-function buildEventContent(event, i) {
+function buildLeft(event, i) {
+  const dayBadge = dayNumbers[event.id] ? `<span class="event-day-badge">Day ${dayNumbers[event.id]}</span>` : '';
+  const photos = event.photos || [];
+  const firstPhoto = photos.length > 0
+    ? `<div class="event-left-photo"><img src="${photos[0].url}" alt="" loading="lazy"></div>`
+    : '';
+
+  return `
+    <div class="sheet-back event-left">
+      <div class="event-left-deco">&#10047;</div>
+      <div class="event-date">${formatDate(event.date)}</div>
+      ${dayBadge}
+      <div class="event-title">${event.title}</div>
+      <div class="event-left-count">共 ${photos.length} 張照片</div>
+      ${firstPhoto}
+    </div>
+  `;
+}
+
+function buildRight(event, i) {
   const photos = event.photos || [];
   const gridClass = photos.length <= 1 ? 'photo-grid-1'
     : photos.length <= 2 ? 'photo-grid-2'
@@ -158,21 +180,20 @@ function flipForward() {
   flipping = true;
 
   const sheet = sheets[current];
-  sheet.style.zIndex = 40;               // on top during animation
+  sheet.style.zIndex = 40;
   sheet.classList.add('flipped');
 
-  const next = current + 1;
-  sheets[next].style.zIndex = 30;        // revealed sheet beneath the flipping one
+  sheets[current + 1].style.zIndex = 30;
 
   sheet.addEventListener('transitionend', function handler(e) {
     if (e.propertyName !== 'transform') return;
     sheet.removeEventListener('transitionend', handler);
-    sheet.style.zIndex = 20;             // landed on the left stack
+    sheet.style.zIndex = 20;
     if (current - 1 >= 0) sheets[current - 1].style.zIndex = 10;
     flipping = false;
   });
 
-  current = next;
+  current++;
   updateUI();
 }
 
@@ -182,7 +203,7 @@ function flipBack() {
 
   const prev = current - 1;
   const sheet = sheets[prev];
-  sheet.style.zIndex = 40;               // on top during animation
+  sheet.style.zIndex = 40;
   sheet.classList.remove('flipped');
 
   sheets[current].style.zIndex = 20;
@@ -190,7 +211,7 @@ function flipBack() {
   sheet.addEventListener('transitionend', function handler(e) {
     if (e.propertyName !== 'transform') return;
     sheet.removeEventListener('transitionend', handler);
-    sheet.style.zIndex = 30;             // back on the right
+    sheet.style.zIndex = 30;
     flipping = false;
   });
 
@@ -202,24 +223,19 @@ function jumpTo(target) {
   if (target < 0 || target >= total) return;
   if (flipping) return;
 
-  // Disable transitions for instant jump
   sheets.forEach(s => s.style.transition = 'none');
-
   for (let i = 0; i < total; i++) {
     if (i < target) sheets[i].classList.add('flipped');
     else sheets[i].classList.remove('flipped');
   }
   current = target;
 
-  // Z-index
   sheets.forEach((s, i) => {
-    if (i < target - 1) s.style.zIndex = 10;
+    if (i === target) s.style.zIndex = 30;
     else if (i === target - 1) s.style.zIndex = 20;
-    else if (i === target) s.style.zIndex = 30;
     else s.style.zIndex = 10;
   });
 
-  // Re-enable transitions
   requestAnimationFrame(() => {
     requestAnimationFrame(() => {
       sheets.forEach(s => s.style.transition = '');
@@ -260,7 +276,7 @@ function buildTOC(events) {
 
     const item = document.createElement('div');
     item.className = 'toc-item';
-    item.dataset.sheet = i + 1; // event sheet index
+    item.dataset.sheet = i + 1;
 
     const dayNum = dayNumbers[event.id];
     const dayLabel = dayNum ? `Day ${dayNum}` : '';
@@ -371,6 +387,8 @@ function setupKeyboard() {
   document.addEventListener('keydown', (e) => {
     if (document.getElementById('lightbox').classList.contains('active')) {
       if (e.key === 'Escape') closeLightbox();
+      else if (e.key === 'ArrowRight') lbNext();
+      else if (e.key === 'ArrowLeft') lbPrev();
       return;
     }
     if (document.getElementById('toc').classList.contains('active')) {
@@ -414,18 +432,46 @@ document.addEventListener('click', (e) => {
 function openLightbox(ei, pi) {
   const event = allEvents[ei];
   if (!event) return;
+  lbPhotos = event.photos.map((p, i) => ({
+    url: p.url,
+    label: `${event.title} — ${i + 1} / ${event.photos.length}`
+  }));
+  lbIndex = Math.min(pi, lbPhotos.length - 1);
+  showLightbox();
+}
+
+function showLightbox() {
   const lb = document.getElementById('lightbox');
-  document.getElementById('lightbox-img').src = event.photos[pi].url;
-  document.getElementById('lightbox-caption').textContent =
-    `${event.title} — ${pi + 1} / ${event.photos.length}`;
+  document.getElementById('lightbox-img').src = lbPhotos[lbIndex].url;
+  document.getElementById('lightbox-caption').textContent = lbPhotos[lbIndex].label;
+
+  const hasNav = lbPhotos.length > 1;
+  document.getElementById('lb-prev').style.display = hasNav ? 'flex' : 'none';
+  document.getElementById('lb-next').style.display = hasNav ? 'flex' : 'none';
+
   lb.classList.add('active');
+}
+
+function lbPrev() {
+  if (lbPhotos.length <= 1) return;
+  lbIndex = (lbIndex - 1 + lbPhotos.length) % lbPhotos.length;
+  showLightbox();
+}
+function lbNext() {
+  if (lbPhotos.length <= 1) return;
+  lbIndex = (lbIndex + 1) % lbPhotos.length;
+  showLightbox();
 }
 
 function closeLightbox() {
   document.getElementById('lightbox').classList.remove('active');
 }
 
-document.getElementById('lightbox').addEventListener('click', (e) => {
-  if (e.target.id === 'lightbox' || e.target.id === 'lightbox-content') closeLightbox();
-});
-document.getElementById('lightbox-close').addEventListener('click', closeLightbox);
+function setupLightbox() {
+  document.getElementById('lightbox').addEventListener('click', (e) => {
+    if (e.target.id === 'lightbox' || e.target.id === 'lightbox-content') closeLightbox();
+  });
+  document.getElementById('lightbox-close').addEventListener('click', closeLightbox);
+  document.getElementById('lb-prev').addEventListener('click', (e) => { e.stopPropagation(); lbPrev(); });
+  document.getElementById('lb-next').addEventListener('click', (e) => { e.stopPropagation(); lbNext(); });
+}
