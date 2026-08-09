@@ -201,7 +201,7 @@ def build_manifest(service, folder_id):
                 'id': f"{e['id']}_p{len(split_special) + 1}",
                 'date': '永遠',
                 'title': '【special】',
-                'photos': photos[i:i + 12]
+                'photos': photos[i:i + 9]
             })
 
     # 沒標題的加上編號
