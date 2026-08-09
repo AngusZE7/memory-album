@@ -292,7 +292,6 @@ function flipForward() {
     if (e.propertyName !== 'transform') return;
     sheet.removeEventListener('transitionend', handler);
     sheet.style.zIndex = 20;
-    if (current - 1 >= 0) sheets[current - 1].style.zIndex = 10;
     flipping = false;
   });
 
