@@ -124,18 +124,13 @@ function buildSheets(data) {
 function buildLeft(event, i) {
   const dayBadge = dayNumbers[event.id] ? `<span class="event-day-badge">Day ${dayNumbers[event.id]}</span>` : '';
   const photos = event.photos || [];
-  const firstPhoto = photos.length > 0
-    ? `<div class="event-left-photo"><img src="${photos[0].url}" alt="" loading="lazy"></div>`
-    : '';
 
   return `
     <div class="sheet-back event-left">
       <div class="event-left-deco">&#10047;</div>
       <div class="event-date">${formatDate(event.date)}</div>
       ${dayBadge}
-      <div class="event-title">${event.title}</div>
       <div class="event-left-count">共 ${photos.length} 張照片</div>
-      ${firstPhoto}
     </div>
   `;
 }

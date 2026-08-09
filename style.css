@@ -370,6 +370,8 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
+  text-align: center;
   background: linear-gradient(165deg, #faf3e8 0%, #f2e2cd 100%);
   position: relative;
   overflow: hidden;
@@ -385,43 +387,19 @@ body {
 .event-left-deco {
   font-size: 1.5rem;
   color: rgba(200,133,106,0.3);
-  margin-top: 30px;
+  margin-bottom: 22px;
 }
 .event-left .event-date {
-  margin-top: 18px;
-  font-size: 0.9rem;
+  font-size: 1rem;
+  margin-bottom: 10px;
 }
 .event-left .event-day-badge {
-  margin-top: 8px;
-}
-.event-left .event-title {
-  margin-top: 14px;
-  font-size: 1.4rem;
-  text-align: center;
-  line-height: 1.5;
+  margin-bottom: 16px;
 }
 .event-left-count {
-  margin-top: 10px;
-  font-size: 0.75rem;
+  font-size: 0.8rem;
   color: var(--text-light);
   letter-spacing: 0.05em;
-}
-.event-left-photo {
-  flex: 1;
-  width: 100%;
-  margin-top: 16px;
-  min-height: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  border-radius: 4px;
-  background: #efe9df;
-}
-.event-left-photo img {
-  max-width: 100%;
-  max-height: 100%;
-  object-fit: contain;
 }
 
 /* ===== Event page (right, front) ===== */
