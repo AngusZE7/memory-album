@@ -40,11 +40,12 @@ function computeDayNumbers() {
 
 /* ===== Sheet structure =====
  * Each event spans a full spread (left + right pages).
- *  sheet 0:       front = cover,          back = event 1 LEFT
- *  sheet j (1..N-1): front = event j RIGHT, back = event j+1 LEFT
- *  sheet N:       front = event N RIGHT,  back = blank
- *  sheet N+1:     front = back cover,     back = blank
- *  current = k (1..N): left shows event k LEFT, right shows event k RIGHT
+ *  sheet 0:       front = cover,        back = intro LEFT
+ *  sheet 1:       front = intro RIGHT,  back = event 1 LEFT
+ *  sheet j (2..N+1): front = event (j-1) RIGHT, back = event j LEFT
+ *  sheet N+2:     front = back cover,   back = blank
+ *  current = 0: cover; current = 1: intro spread;
+ *  current = i+2 (0..N-1): left shows event i LEFT, right shows event i RIGHT
  */
 function buildSheets(data) {
   const container = document.getElementById('sheets-container');
@@ -69,20 +70,23 @@ function buildSheets(data) {
       <div class="cover-deco-bottom"><span>&#10084;</span></div>
       <div class="confetti-container" id="confetti"></div>
     </div>
-    ${N > 0 ? buildLeft(allEvents[0], 0) : INNER}
+    ${buildIntroLeft()}
   `;
   container.appendChild(coverSheet);
   sheets.push(coverSheet);
 
-  // Sheets 1..N
-  for (let j = 1; j <= N; j++) {
+  // Sheets 1..N+1: intro-right + events
+  for (let j = 1; j <= N + 1; j++) {
     const sheet = document.createElement('div');
     sheet.className = 'sheet';
 
-    const front = buildRight(allEvents[j - 1], j - 1);
-    const back = j === N
+    const front = j === 1
+      ? buildIntroRight()
+      : buildRight(allEvents[j - 2], j - 2);
+
+    const back = j === N + 1
       ? `<div class="sheet-back inner-cover"><span class="inner-text">&#10084;</span></div>`
-      : buildLeft(allEvents[j], j);
+      : buildLeft(allEvents[j - 1], j - 1);
 
     sheet.innerHTML = `
       <div class="sheet-front event-page">${front}</div>
@@ -119,6 +123,56 @@ function buildSheets(data) {
 
   sheets.forEach((s, i) => { s.style.zIndex = 10; });
   sheets[0].style.zIndex = 30;
+}
+
+function buildIntroLeft() {
+  return `
+    <div class="sheet-back intro-left">
+      <div class="intro-left-deco">&#10047;</div>
+      <h2 class="intro-title">使用說明</h2>
+      <div class="intro-line"></div>
+      <p class="intro-sub">如何閱讀這本回憶錄</p>
+    </div>
+  `;
+}
+
+function buildIntroRight() {
+  return `
+    <div class="intro-right">
+      <h2 class="intro-title">這本書怎麼看？</h2>
+      <div class="intro-sections">
+        <div class="intro-section">
+          <div class="intro-num">1</div>
+          <div class="intro-body">
+            <h3>翻頁</h3>
+            <p>點擊書本的左、右半邊，或按鍵盤的 ← → 鍵，就能像翻書一樣前後瀏覽。</p>
+          </div>
+        </div>
+        <div class="intro-section">
+          <div class="intro-num">2</div>
+          <div class="intro-body">
+            <h3>目錄跳轉</h3>
+            <p>點右上角的 ☰「目錄」，可以快速跳到任何一段回憶，也可以用關鍵字搜尋。</p>
+          </div>
+        </div>
+        <div class="intro-section">
+          <div class="intro-num">3</div>
+          <div class="intro-body">
+            <h3>放大照片</h3>
+            <p>點一下照片會放大顯示，再用 ← → 鍵或畫面上的箭頭，瀏覽同一天的其他照片。</p>
+          </div>
+        </div>
+        <div class="intro-section">
+          <div class="intro-num">4</div>
+          <div class="intro-body">
+            <h3>貼心小統計</h3>
+            <p>封面與封底記錄了我們共收集了多少張照片、多少個回憶、以及相戀了多少天。</p>
+          </div>
+        </div>
+      </div>
+      <div class="intro-foot">&#10084; 願每一頁都是我們的故事 &#10084;</div>
+    </div>
+  `;
 }
 
 function buildLeft(event, i) {
@@ -280,7 +334,7 @@ function buildTOC(events) {
 
     const item = document.createElement('div');
     item.className = 'toc-item';
-    item.dataset.sheet = i + 1;
+    item.dataset.sheet = i + 2;
 
     const dayNum = dayNumbers[event.id];
     const dayLabel = dayNum ? `Day ${dayNum}` : '';
@@ -296,7 +350,7 @@ function buildTOC(events) {
     `;
 
     item.addEventListener('click', () => {
-      jumpTo(i + 1);
+      jumpTo(i + 2);
       closeTOC();
     });
 

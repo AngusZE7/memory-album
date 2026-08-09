@@ -363,6 +363,110 @@ body {
   letter-spacing: 0.3em;
 }
 
+/* ===== Intro (使用說明) ===== */
+.intro-left {
+  width: 100%; height: 100%;
+  padding: 40px 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  background: linear-gradient(165deg, #f7eee1 0%, #e9dbc6 100%);
+  position: relative;
+  overflow: hidden;
+}
+.intro-left::before {
+  content: '';
+  position: absolute;
+  inset: 22px;
+  border: 1px solid rgba(180,140,100,0.25);
+  border-radius: 4px;
+  pointer-events: none;
+}
+.intro-left-deco {
+  font-size: 1.6rem;
+  color: rgba(200,133,106,0.35);
+  margin-bottom: 24px;
+}
+.intro-title {
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: var(--text-dark);
+  letter-spacing: 0.1em;
+}
+.intro-line {
+  width: 60px;
+  height: 2px;
+  margin: 16px 0 14px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+}
+.intro-sub {
+  font-size: 0.85rem;
+  color: var(--text-light);
+  letter-spacing: 0.08em;
+}
+
+.intro-right {
+  width: 100%; height: 100%;
+  padding: 40px 46px;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(170deg, #fdf8ef 0%, #f3e7d3 100%);
+  overflow: hidden;
+  position: relative;
+}
+.intro-right .intro-title {
+  font-size: 1.5rem;
+  text-align: center;
+  margin-bottom: 24px;
+}
+.intro-sections {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 18px;
+  min-height: 0;
+}
+.intro-section {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+}
+.intro-num {
+  flex-shrink: 0;
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), #a0684f);
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 2px;
+}
+.intro-body h3 {
+  font-size: 1.05rem;
+  margin: 0 0 4px;
+  color: var(--text-dark);
+}
+.intro-body p {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.65;
+  color: var(--text-light);
+}
+.intro-foot {
+  text-align: center;
+  font-size: 0.75rem;
+  color: rgba(200,133,106,0.6);
+  letter-spacing: 0.05em;
+  padding-top: 18px;
+  border-top: 1px dashed rgba(180,140,100,0.25);
+}
+
 /* ===== Event LEFT page (title page) ===== */
 .event-left {
   width: 100%; height: 100%;
