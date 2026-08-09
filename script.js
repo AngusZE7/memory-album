@@ -4,6 +4,15 @@ let current = 0;
 let total = 0;
 let flipping = false;
 let dayNumbers = {};
+const ANNIVERSARY = new Date('2024-11-14');
+
+function daysTogether() {
+  const today = new Date();
+  const start = new Date(ANNIVERSARY.getTime());
+  today.setHours(0, 0, 0, 0);
+  start.setHours(0, 0, 0, 0);
+  return Math.floor((today - start) / 86400000) + 1;
+}
 
 let lbPhotos = [];
 let lbIndex = 0;
@@ -29,7 +38,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 function computeDayNumbers() {
-  const startDate = new Date('2024-11-14');
+  const startDate = ANNIVERSARY;
   allEvents.forEach(e => {
     if (e.date) {
       const d = new Date(e.date);
@@ -114,10 +123,9 @@ function buildSheets(data) {
 
   total = sheets.length;
 
-  document.getElementById('cover-stats').textContent =
-    `${data.total_photos || 0} 張照片 · ${allEvents.length} 個回憶 · ${data.total_days || 0} 天`;
-  document.getElementById('back-stats').textContent =
-    `${data.total_photos || 0} 張照片 · ${allEvents.length} 個回憶 · ${data.total_days || 0} 天`;
+  const stats = `${data.total_photos || 0} 張照片 · ${allEvents.length} 個回憶 · ${daysTogether()} 天`;
+  document.getElementById('cover-stats').textContent = stats;
+  document.getElementById('back-stats').textContent = stats;
 
   buildTOC(allEvents);
 
