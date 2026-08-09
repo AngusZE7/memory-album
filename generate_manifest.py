@@ -83,6 +83,14 @@ def get_direct_url(file_id):
     return f"https://lh3.googleusercontent.com/d/{file_id}"
 
 
+def extract_special_title(name):
+    """沒有日期的資料夾，若名稱以 Special 開頭且有文字，取後面的文字當標題"""
+    m = re.match(r'(?i)^special[-_ ]*(.*)', name.strip())
+    if m and m.group(1).strip():
+        return m.group(1).strip()
+    return '【special】'
+
+
 def parse_filename(filename):
     """從檔名解析日期和描述
     格式: YYYYMMDD_描述 或 YYYYMMDD-HHMMSS
@@ -172,13 +180,21 @@ def build_manifest(service, folder_id):
         events.append({
             'id': f"event_{date_str or folder_name}_{len(events)}",
             'date': date_str or '',
-            # 無法從資料夾名解析日期的，標題改為「special」
-            'title': '【special】' if not date_str else (desc or folder_name),
+            # 無法從資料夾名解析日期的，改用 special 標題（有文字取文字）
+            'title': (desc or folder_name) if date_str else extract_special_title(folder_name),
             'photos': photos
         })
 
     # 按日期排序（沒有日期的排在最後面）
     events.sort(key=lambda e: e['date'] or '9999')
+
+    # 沒有文字的 special 事件加上編號
+    special_n = 0
+    for e in events:
+        if not e['date']:
+            special_n += 1
+            if e['title'] == '【special】':
+                e['title'] = f'【special】 {special_n}'
 
     # 計算在一起的天數（以交往紀念日為基準）
     total_days = 0
