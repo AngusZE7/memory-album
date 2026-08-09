@@ -192,11 +192,11 @@ def build_manifest(service, folder_id):
 
     dated.sort(key=lambda e: e['date'])
 
-    # 沒標題的一頁最多 12 張，超過就拆成多頁
+    # 沒標題的一頁最多 9 張，超過就拆成多頁
     split_special = []
     for e in untitled_special:
         photos = e['photos']
-        for i in range(0, len(photos), 12):
+        for i in range(0, len(photos), 9):
             split_special.append({
                 'id': f"{e['id']}_p{len(split_special) + 1}",
                 'date': '永遠',
