@@ -64,15 +64,9 @@ function buildPages(events) {
       : photos.length <= 4 ? 'photo-grid-4'
       : 'photo-grid-more';
 
-    const displayPhotos = photos.slice(0, photos.length > 4 ? 4 : photos.length);
-    const hasMore = photos.length > 4;
-
-    const photosHTML = displayPhotos.map((p, idx) => {
-      const extra = (idx === displayPhotos.length - 1 && hasMore)
-        ? `<div class="photo-more-overlay">+${photos.length - 4}</div>` : '';
+    const photosHTML = photos.map((p, idx) => {
       return `<div class="photo-cell" data-event-idx="${i}" data-photo-idx="${idx}">
         <img src="${p.url}" alt="" loading="lazy">
-        ${extra}
       </div>`;
     }).join('');
 
