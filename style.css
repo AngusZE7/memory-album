@@ -354,6 +354,14 @@ body {
   filter: drop-shadow(0 1px 2px rgba(0,0,0,0.15));
 }
 .cover-sub-koala { display: inline-flex; align-items: center; }
+.cover-chars {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 14px;
+  margin-top: 16px;
+}
+.cover-chars svg { filter: drop-shadow(0 3px 5px rgba(120,90,60,0.25)); }
 .cover-stats { margin-top: 14px; font-size: 0.8rem; color: var(--gold); letter-spacing: 0.05em; }
 .cover-deco-bottom { position: absolute; bottom: 35px; font-size: 1.5rem; color: rgba(200,100,80,0.2); }
 
@@ -511,6 +519,14 @@ body {
   color: rgba(200,133,106,0.35);
   margin-bottom: 20px;
 }
+.last-chars {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.last-chars svg { filter: drop-shadow(0 2px 4px rgba(120,90,60,0.2)); }
 .last-label {
   font-size: 0.85rem;
   color: var(--text-light);
@@ -702,6 +718,8 @@ body {
   overflow: hidden;
 }
 .back-deco { font-size: 1.8rem; color: rgba(200,133,106,0.25); margin-bottom: 16px; }
+.back-chars { margin-bottom: 10px; }
+.back-chars svg { filter: drop-shadow(0 3px 5px rgba(120,90,60,0.25)); }
 .back-text {
   font-family: 'Noto Serif TC', serif;
   font-size: 1.8rem;

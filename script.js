@@ -47,6 +47,62 @@ function computeDayNumbers() {
   });
 }
 
+/* ===== Cute characters (cutekiwi_0803 style) ===== */
+function svgKiwiTan() {
+  return `<svg class="kiwi-char" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 104" width="74" height="77" aria-label="奇異鳥">
+    <ellipse cx="50" cy="60" rx="37" ry="35" fill="#BFAF9F"/>
+    <ellipse cx="50" cy="76" rx="15" ry="10" fill="#D8CBB8" opacity="0.8"/>
+    <path d="M36 90 v7 M36 90 l-5 4 M36 90 l5 4" stroke="#8A7F70" stroke-width="3" stroke-linecap="round" fill="none"/>
+    <path d="M64 90 v7 M64 90 l-5 4 M64 90 l5 4" stroke="#8A7F70" stroke-width="3" stroke-linecap="round" fill="none"/>
+    <ellipse cx="50" cy="29" rx="27" ry="20" fill="#59524C"/>
+    <path d="M50 9 q-2 -9 7 -10 q-5 3 -2 10" fill="#59524C"/>
+    <circle cx="41" cy="25" r="3.6" fill="#fff"/>
+    <circle cx="42.1" cy="23.9" r="1.3" fill="#3A332E"/>
+    <circle cx="59" cy="25" r="3.6" fill="#fff"/>
+    <circle cx="60.1" cy="23.9" r="1.3" fill="#3A332E"/>
+    <ellipse cx="34" cy="52" rx="5" ry="3.5" fill="#E8B3A6" opacity="0.7"/>
+    <ellipse cx="66" cy="52" rx="5" ry="3.5" fill="#E8B3A6" opacity="0.7"/>
+    <path d="M47 39 C43 46 44 54 50 58 C56 54 56 46 53 39 Z" fill="#D3A86B"/>
+  </svg>`;
+}
+
+function svgKoala() {
+  return `<svg class="koala-char" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 110 116" width="78" height="82" aria-label="無尾熊">
+    <ellipse cx="26" cy="21" rx="17" ry="16" fill="#5A5148"/>
+    <ellipse cx="26" cy="21" rx="9" ry="8" fill="#A99B88"/>
+    <ellipse cx="84" cy="21" rx="17" ry="16" fill="#5A5148"/>
+    <ellipse cx="84" cy="21" rx="9" ry="8" fill="#A99B88"/>
+    <path d="M13 72 Q3 80 9 90 Q14 94 22 88 Q20 80 22 72 Z" fill="#BDB09F"/>
+    <path d="M97 72 Q107 80 101 90 Q96 94 88 88 Q90 80 88 72 Z" fill="#BDB09F"/>
+    <ellipse cx="55" cy="64" rx="42" ry="45" fill="#BDB09F"/>
+    <ellipse cx="55" cy="92" rx="20" ry="13" fill="#D8CBB8"/>
+    <ellipse cx="55" cy="53" rx="10" ry="8" fill="#4A4038"/>
+    <circle cx="36" cy="45" r="4" fill="#3A332E"/>
+    <circle cx="37.4" cy="43.6" r="1.4" fill="#fff"/>
+    <circle cx="74" cy="45" r="4" fill="#3A332E"/>
+    <circle cx="75.4" cy="43.6" r="1.4" fill="#fff"/>
+    <ellipse cx="25" cy="61" rx="6" ry="4" fill="#E8B3A6" opacity="0.7"/>
+    <ellipse cx="85" cy="61" rx="6" ry="4" fill="#E8B3A6" opacity="0.7"/>
+    <path d="M50 61 Q55 65 60 61" stroke="#7A6A58" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+    <ellipse cx="39" cy="107" rx="10" ry="6" fill="#8A7F70"/>
+    <ellipse cx="71" cy="107" rx="10" ry="6" fill="#8A7F70"/>
+  </svg>`;
+}
+
+function svgPaleKiwi() {
+  return `<svg class="pale-kiwi-char" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 110" width="72" height="82" aria-label="小奇異鳥">
+    <ellipse cx="44" cy="60" rx="27" ry="31" fill="#F2F1EF" stroke="#C9C6C1" stroke-width="2.5"/>
+    <path d="M30 88 v7 M30 88 l-5 4 M30 88 l5 4" stroke="#A99B88" stroke-width="3" stroke-linecap="round" fill="none"/>
+    <path d="M52 88 v7 M52 88 l-5 4 M52 88 l5 4" stroke="#A99B88" stroke-width="3" stroke-linecap="round" fill="none"/>
+    <path d="M34 28 q-1 -11 8 -13 q-6 3 -3 13" fill="#F2F1EF" stroke="#C9C6C1" stroke-width="2" stroke-linejoin="round"/>
+    <path d="M62 42 C78 45 87 56 92 74 C85 73 75 66 67 53 C63 47 62 44 62 42 Z" fill="#D3A86B"/>
+    <path d="M62 48 C70 55 78 61 84 68" stroke="#C89A62" stroke-width="1.2" fill="none"/>
+    <circle cx="53" cy="44" r="3.6" fill="#4A4038"/>
+    <circle cx="54.2" cy="42.8" r="1.3" fill="#fff"/>
+    <ellipse cx="48" cy="56" rx="5" ry="3.5" fill="#E8B3A6" opacity="0.7"/>
+  </svg>`;
+}
+
 /* ===== Sheet structure =====
  * Each event spans a full spread (left + right pages).
  *  sheet 0:       front = cover,        back = intro LEFT
@@ -89,6 +145,7 @@ function buildSheets(data) {
           </svg>
           <span class="cover-sub-koala">🐨 回憶錄</span>
         </p>
+        <div class="cover-chars">${svgKiwiTan()}${svgKoala()}</div>
         <div class="cover-stats" id="cover-stats"></div>
       </div>
       <div class="cover-deco-bottom"><span>&#10084;</span></div>
@@ -125,6 +182,7 @@ function buildSheets(data) {
   backSheet.className = 'sheet';
   backSheet.innerHTML = `
     <div class="sheet-front back-cover-front">
+      <div class="back-chars">${svgPaleKiwi()}</div>
       <div class="back-deco">&#10047;</div>
       <p class="back-text">未完待續....</p>
       <p class="back-sub">還要和寶寶創造更多更多的回憶</p>
@@ -153,6 +211,7 @@ function buildLastLeft() {
   return `
     <div class="sheet-back last-left">
       <div class="last-deco">&#10084;</div>
+      <div class="last-chars">${svgKiwiTan()}${svgKoala()}</div>
       <p class="last-label">今天</p>
       <p class="last-date">${now.getFullYear()} 年 ${now.getMonth() + 1} 月 ${now.getDate()} 日</p>
       <div class="last-divider"></div>
