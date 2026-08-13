@@ -74,20 +74,18 @@ function buildSheets(data) {
         <h1 class="cover-title">奇異鳥和<br>無尾熊的<br>奇幻冒險</h1>
         <div class="cover-line"></div>
         <p class="cover-subtitle">
-          <svg class="kiwi-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="26" height="26" aria-label="奇異鳥">
-            <path d="M26 50 v6 M38 50 v6" stroke="#C98D4B" stroke-width="3.2" stroke-linecap="round"/>
-            <path d="M31 52 l3 5 M33 52 l3 5" stroke="#C98D4B" stroke-width="2.6" stroke-linecap="round" fill="none"/>
-            <ellipse cx="32" cy="33" rx="16.5" ry="19" fill="#8A6A44"/>
-            <circle cx="26" cy="29" r="1.3" fill="#6E5233"/>
-            <circle cx="34" cy="37" r="1.3" fill="#6E5233"/>
-            <circle cx="29" cy="44" r="1.3" fill="#6E5233"/>
-            <circle cx="39" cy="27" r="1.3" fill="#6E5233"/>
-            <circle cx="22" cy="39" r="1.3" fill="#6E5233"/>
-            <circle cx="36" cy="22" r="1.3" fill="#6E5233"/>
-            <path d="M47 33 C56 34 61 39 62 46 C58 43 52 42 46 41 Z" fill="#E8C58A"/>
-            <path d="M46 40 C50 41 54 42 57 44" stroke="#D3A86B" stroke-width="1" fill="none"/>
-            <circle cx="41" cy="29.5" r="2.4" fill="#2B2118"/>
-            <circle cx="41.9" cy="28.7" r="0.9" fill="#fff"/>
+          <svg class="kiwi-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="30" height="30" aria-label="奇異鳥">
+            <path d="M26 54 l-4 3 M26 54 l0 5 M26 54 l4 3" stroke="#C98D4B" stroke-width="2.6" stroke-linecap="round" fill="none"/>
+            <path d="M37 55 l-4 3 M37 55 l0 5 M37 55 l4 3" stroke="#C98D4B" stroke-width="2.6" stroke-linecap="round" fill="none"/>
+            <path d="M44 19 C55 24 57 35 54 43 C51 52 42 58 33 58 C24 58 18 50 17 39 C16 28 25 18 44 19 Z" fill="#8A6A44"/>
+            <circle cx="37" cy="28" r="1.2" fill="#6E5233"/>
+            <circle cx="44" cy="38" r="1.2" fill="#6E5233"/>
+            <circle cx="30" cy="40" r="1.2" fill="#6E5233"/>
+            <circle cx="48" cy="47" r="1.2" fill="#6E5233"/>
+            <circle cx="37" cy="50" r="1.2" fill="#6E5233"/>
+            <path d="M25 26 C16 28 8 34 4 45 C9 47 16 44 23 36 C25 33 25 29 25 26 Z" fill="#E8C58A"/>
+            <circle cx="35" cy="27" r="2.2" fill="#2B2118"/>
+            <circle cx="35.9" cy="26.2" r="0.8" fill="#fff"/>
           </svg>
           <span class="cover-sub-koala">🐨 回憶錄</span>
         </p>
