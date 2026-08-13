@@ -62,7 +62,7 @@ function buildSheets(data) {
   sheets = [];
 
   const N = allEvents.length;
-  const INNER = `<div class="sheet-back inner-cover"><span class="inner-text">&#10047; 我們的回憶 &#10047;</span></div>`;
+  const INNER = `<div class="sheet-back inner-cover"><span class="inner-text">&#10047; 未來還有好多寶寶日！ &#10047;</span></div>`;
 
   // Sheet 0: cover
   const coverSheet = document.createElement('div');
@@ -126,8 +126,8 @@ function buildSheets(data) {
   backSheet.innerHTML = `
     <div class="sheet-front back-cover-front">
       <div class="back-deco">&#10047;</div>
-      <p class="back-text">未完待續...</p>
-      <p class="back-sub">每一天都是新的回憶</p>
+      <p class="back-text">未完待續，更多的膜膜會一一誕生！</p>
+      <p class="back-sub">還要和寶寶創造更多更多的回憶</p>
       <div class="back-stats" id="back-stats"></div>
       <div class="back-hearts"><span>&#10084;</span><span>&#10084;</span><span>&#10084;</span></div>
     </div>
@@ -156,7 +156,7 @@ function buildLastLeft() {
       <p class="last-label">今天</p>
       <p class="last-date">${now.getFullYear()} 年 ${now.getMonth() + 1} 月 ${now.getDate()} 日</p>
       <div class="last-divider"></div>
-      <p class="last-label">我們已經在一起</p>
+      <p class="last-label">是我們交往的第</p>
       <p class="last-days">${daysTogether()} 天</p>
       <p class="last-sub">未完待續...</p>
     </div>
