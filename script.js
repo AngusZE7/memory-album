@@ -126,7 +126,7 @@ function buildSheets(data) {
   backSheet.innerHTML = `
     <div class="sheet-front back-cover-front">
       <div class="back-deco">&#10047;</div>
-      <p class="back-text">未完待續，更多的膜膜會一一誕生！</p>
+      <p class="back-text">未完待續....</p>
       <p class="back-sub">還要和寶寶創造更多更多的回憶</p>
       <div class="back-stats" id="back-stats"></div>
       <div class="back-hearts"><span>&#10084;</span><span>&#10084;</span><span>&#10084;</span></div>
@@ -158,7 +158,7 @@ function buildLastLeft() {
       <div class="last-divider"></div>
       <p class="last-label">是我們交往的第</p>
       <p class="last-days">${daysTogether()} 天</p>
-      <p class="last-sub">未完待續...</p>
+      <p class="last-sub">膜膜也想要有更多回憶！</p>
     </div>
   `;
 }
