@@ -73,7 +73,24 @@ function buildSheets(data) {
       <div class="cover-frame">
         <h1 class="cover-title">奇異鳥和<br>無尾熊的<br>奇幻冒險</h1>
         <div class="cover-line"></div>
-        <p class="cover-subtitle">🐦 🐨 回憶錄</p>
+        <p class="cover-subtitle">
+          <svg class="kiwi-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="26" height="26" aria-label="奇異鳥">
+            <path d="M26 50 v6 M38 50 v6" stroke="#C98D4B" stroke-width="3.2" stroke-linecap="round"/>
+            <path d="M31 52 l3 5 M33 52 l3 5" stroke="#C98D4B" stroke-width="2.6" stroke-linecap="round" fill="none"/>
+            <ellipse cx="32" cy="33" rx="16.5" ry="19" fill="#8A6A44"/>
+            <circle cx="26" cy="29" r="1.3" fill="#6E5233"/>
+            <circle cx="34" cy="37" r="1.3" fill="#6E5233"/>
+            <circle cx="29" cy="44" r="1.3" fill="#6E5233"/>
+            <circle cx="39" cy="27" r="1.3" fill="#6E5233"/>
+            <circle cx="22" cy="39" r="1.3" fill="#6E5233"/>
+            <circle cx="36" cy="22" r="1.3" fill="#6E5233"/>
+            <path d="M47 33 C56 34 61 39 62 46 C58 43 52 42 46 41 Z" fill="#E8C58A"/>
+            <path d="M46 40 C50 41 54 42 57 44" stroke="#D3A86B" stroke-width="1" fill="none"/>
+            <circle cx="41" cy="29.5" r="2.4" fill="#2B2118"/>
+            <circle cx="41.9" cy="28.7" r="0.9" fill="#fff"/>
+          </svg>
+          <span class="cover-sub-koala">🐨 回憶錄</span>
+        </p>
         <div class="cover-stats" id="cover-stats"></div>
       </div>
       <div class="cover-deco-bottom"><span>&#10084;</span></div>
