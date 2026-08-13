@@ -73,7 +73,7 @@ function buildSheets(data) {
       <div class="cover-frame">
         <h1 class="cover-title">奇異鳥和<br>無尾熊的<br>奇幻冒險</h1>
         <div class="cover-line"></div>
-        <p class="cover-subtitle">【🥝】【🐨】回憶錄</p>
+        <p class="cover-subtitle">🐦 🐨 回憶錄</p>
         <div class="cover-stats" id="cover-stats"></div>
       </div>
       <div class="cover-deco-bottom"><span>&#10084;</span></div>
