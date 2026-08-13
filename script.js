@@ -71,7 +71,7 @@ function buildSheets(data) {
     <div class="sheet-front cover-front">
       <div class="cover-deco-top">&#10047; &#10047; &#10047;</div>
       <div class="cover-frame">
-        <h1 class="cover-title">我們的<br>回憶錄</h1>
+        <h1 class="cover-title">奇異鳥和<br>無尾熊的<br>奇幻冒險</h1>
         <div class="cover-line"></div>
         <p class="cover-subtitle">從那天開始的每一天</p>
         <div class="cover-stats" id="cover-stats"></div>
