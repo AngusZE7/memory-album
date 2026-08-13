@@ -167,9 +167,9 @@ function buildIntroLeft() {
   return `
     <div class="sheet-back intro-left">
       <div class="intro-left-deco">&#10047;</div>
-      <h2 class="intro-title">使用說明</h2>
+      <h2 class="intro-title">回憶錄使用說明</h2>
       <div class="intro-line"></div>
-      <p class="intro-sub">如何閱讀這本回憶錄</p>
+      <p class="intro-sub">膜膜來教學了！</p>
     </div>
   `;
 }
@@ -177,13 +177,13 @@ function buildIntroLeft() {
 function buildIntroRight() {
   return `
     <div class="intro-right">
-      <h2 class="intro-title">這本書怎麼看？</h2>
+      <h2 class="intro-title">下面有四顆奇異果，我們來把他一一看過去吧！</h2>
       <div class="intro-sections">
         <div class="intro-section">
           <div class="intro-num">1</div>
           <div class="intro-body">
             <h3>翻頁</h3>
-            <p>點擊書本的左、右半邊，或按鍵盤的 ← → 鍵，就能像翻書一樣前後瀏覽。</p>
+            <p>可以點擊書本左右側，或是按下鍵盤的⭠ ⭢ ，就可以翻閱此書。</p>
           </div>
         </div>
         <div class="intro-section">
@@ -204,11 +204,11 @@ function buildIntroRight() {
           <div class="intro-num">4</div>
           <div class="intro-body">
             <h3>貼心小統計</h3>
-            <p>封面與封底記錄了我們共收集了多少張照片、多少個回憶、以及相戀了多少天。</p>
+            <p>封面和封底都有紀錄我們蒐集的照片總數、還有我們交往的天數！</p>
           </div>
         </div>
       </div>
-      <div class="intro-foot">&#10084; 願每一頁都是我們的故事 &#10084;</div>
+      <div class="intro-foot">膜膜太期待了！趕快翻閱回憶錄吧！</div>
     </div>
   `;
 }
