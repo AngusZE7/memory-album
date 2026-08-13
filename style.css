@@ -433,9 +433,11 @@ body {
   position: relative;
 }
 .intro-right .intro-title {
-  font-size: 1.5rem;
+  font-size: clamp(0.72rem, 2.4vw, 1.12rem);
   text-align: center;
   margin-bottom: 24px;
+  white-space: nowrap;
+  letter-spacing: 0.06em;
 }
 .intro-sections {
   flex: 1;
@@ -476,7 +478,7 @@ body {
 }
 .intro-foot {
   text-align: center;
-  font-size: 0.75rem;
+  font-size: 0.68rem;
   color: rgba(200,133,106,0.6);
   letter-spacing: 0.05em;
   padding-top: 18px;
@@ -835,6 +837,7 @@ body {
   .cover-title { font-size: 2rem; }
   .cover-frame { padding: 35px 25px; }
   .event-page { padding: 24px 14px 28px 12px; }
+  .intro-right .intro-title { white-space: normal; font-size: 1rem; }
   .event-title { font-size: 1.05rem; }
   .event-left { padding: 24px 16px; }
   .event-left .event-title { font-size: 1.1rem; }

@@ -177,7 +177,7 @@ function buildIntroLeft() {
 function buildIntroRight() {
   return `
     <div class="intro-right">
-      <h2 class="intro-title">下面有四顆奇異果，我們來把他一一看過去吧！</h2>
+      <h2 class="intro-title">我們來把下面四顆奇異果一一看過去吧！</h2>
       <div class="intro-sections">
         <div class="intro-section">
           <div class="intro-num">1</div>
