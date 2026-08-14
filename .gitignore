@@ -1,5 +1,6 @@
 credentials.json
 token.json
+service_account.json
 使用者Oauth.txt
 __pycache__/
 *.pyc

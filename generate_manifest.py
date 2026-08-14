@@ -17,6 +17,7 @@ from pathlib import Path
 
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
+from google.oauth2 import service_account
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 
@@ -36,6 +37,12 @@ ANNIVERSARY = '2024-11-14'
 
 
 def get_credentials():
+    # 1. Service account（CI / 永不過期）: service_account.json 或環境變數 GDRIVE_SA_JSON
+    sa_file = os.environ.get('GDRIVE_SA_JSON') or 'service_account.json'
+    if os.path.exists(sa_file):
+        return service_account.Credentials.from_service_account_file(sa_file, scopes=SCOPES)
+
+    # 2. 個人 OAuth（本機手動掃描）
     creds = None
     if os.path.exists('token.json'):
         creds = Credentials.from_authorized_user_file('token.json', SCOPES)

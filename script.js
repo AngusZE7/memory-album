@@ -16,11 +16,13 @@ function daysTogether() {
 
 let lbPhotos = [];
 let lbIndex = 0;
+let rawManifest = '';
 
 document.addEventListener('DOMContentLoaded', async () => {
   try {
     const res = await fetch('photos.json?t=' + Date.now());
-    const data = await res.json();
+    rawManifest = await res.text();
+    const data = JSON.parse(rawManifest);
     allEvents = data.events || [];
 
     computeDayNumbers();
@@ -32,10 +34,51 @@ document.addEventListener('DOMContentLoaded', async () => {
     setupSwipe();
     setupLightbox();
     updateUI();
+    checkForUpdates();
   } catch (err) {
     console.error('Error:', err);
   }
 });
+
+/* ===== 開啟網站時自動檢查雲端並更新 ===== */
+const GH_REPO = 'AngusZE7/memory-album';
+const GH_WORKFLOW = 'update-photos.yml';
+const TRIGGER_MIN = 15;
+const WATCH_MS = 480000;
+
+function checkForUpdates() {
+  if (!window.GH_PAT) return;
+  const last = parseInt(localStorage.getItem('albumLastTrigger') || '0', 10);
+  if (Date.now() - last < TRIGGER_MIN * 60000) return;
+  localStorage.setItem('albumLastTrigger', String(Date.now()));
+
+  fetch(`https://api.github.com/repos/${GH_REPO}/actions/workflows/${GH_WORKFLOW}/dispatches`, {
+    method: 'POST',
+    headers: {
+      'Authorization': 'Bearer ' + window.GH_PAT,
+      'Accept': 'application/vnd.github+json',
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ ref: 'main' })
+  }).then(r => {
+    if (r.ok) watchForUpdate();
+  }).catch(() => {});
+}
+
+function watchForUpdate() {
+  const start = Date.now();
+  const timer = setInterval(async () => {
+    if (Date.now() - start > WATCH_MS) { clearInterval(timer); return; }
+    try {
+      const r = await fetch(`photos.json?t=${Date.now()}`);
+      const t = await r.text();
+      if (rawManifest && t !== rawManifest) {
+        clearInterval(timer);
+        location.reload();
+      }
+    } catch (e) {}
+  }, 10000);
+}
 
 function computeDayNumbers() {
   const startDate = ANNIVERSARY;
