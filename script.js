@@ -57,7 +57,8 @@ function checkForUpdates() {
 }
 
 function promptForPat() {
-  if (sessionStorage.getItem('albumPatSkipped')) return;
+  const forceSetup = location.search.includes('setup');
+  if (!forceSetup && localStorage.getItem('albumPatSkipped')) return;
 
   const overlay = document.createElement('div');
   overlay.className = 'pat-overlay';
@@ -78,7 +79,7 @@ function promptForPat() {
     if (e.target === overlay) close();
   });
   document.getElementById('pat-skip').addEventListener('click', () => {
-    sessionStorage.setItem('albumPatSkipped', '1');
+    localStorage.setItem('albumPatSkipped', '1');
     close();
   });
   document.getElementById('pat-save').addEventListener('click', () => {
