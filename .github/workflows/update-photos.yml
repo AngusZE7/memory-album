@@ -1,0 +1,41 @@
+name: Auto Update Photos
+
+on:
+  schedule:
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-photos
+  cancel-in-progress: false
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install google-api-python-client google-auth-httplib2 google-auth-oauthlib
+
+      - name: Restore Google Drive credentials
+        run: |
+          echo "${{ secrets.GDRIVE_CREDENTIALS_B64 }}" | base64 -d > credentials.json
+          echo "${{ secrets.GDRIVE_TOKEN_B64 }}" | base64 -d > token.json
+
+      - name: Scan Google Drive
+        run: python generate_manifest.py
+
+      - name: Commit and push if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add photos.json
+          git diff --cached --quiet && echo "No changes" || { git commit -m "chore: 自動掃描雲端相簿更新"; git push; }
