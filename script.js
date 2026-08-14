@@ -46,8 +46,53 @@ const GH_WORKFLOW = 'update-photos.yml';
 const TRIGGER_MIN = 15;
 const WATCH_MS = 480000;
 
+function getPat() {
+  return (window.GH_PAT || '').trim() || (localStorage.getItem('albumPat') || '').trim();
+}
+
 function checkForUpdates() {
-  if (!window.GH_PAT) return;
+  const pat = getPat();
+  if (!pat) { promptForPat(); return; }
+  triggerUpdate(pat);
+}
+
+function promptForPat() {
+  if (sessionStorage.getItem('albumPatSkipped')) return;
+
+  const overlay = document.createElement('div');
+  overlay.className = 'pat-overlay';
+  overlay.innerHTML = `
+    <div class="pat-box">
+      <p class="pat-title">要不要開啟「自動更新」？</p>
+      <p class="pat-desc">貼上你的更新 Token（只存於這台瀏覽器，repo 不會有）</p>
+      <input type="password" id="pat-input" placeholder="github_pat_...">
+      <div class="pat-btns">
+        <button class="pat-btn pat-save" id="pat-save">儲存並更新</button>
+        <button class="pat-btn pat-skip" id="pat-skip">以後再說</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) close();
+  });
+  document.getElementById('pat-skip').addEventListener('click', () => {
+    sessionStorage.setItem('albumPatSkipped', '1');
+    close();
+  });
+  document.getElementById('pat-save').addEventListener('click', () => {
+    const v = document.getElementById('pat-input').value.trim();
+    if (!v) return;
+    localStorage.setItem('albumPat', v);
+    close();
+    triggerUpdate(v);
+  });
+
+  function close() { overlay.remove(); }
+}
+
+function triggerUpdate(pat) {
   const last = parseInt(localStorage.getItem('albumLastTrigger') || '0', 10);
   if (Date.now() - last < TRIGGER_MIN * 60000) return;
   localStorage.setItem('albumLastTrigger', String(Date.now()));
@@ -55,7 +100,7 @@ function checkForUpdates() {
   fetch(`https://api.github.com/repos/${GH_REPO}/actions/workflows/${GH_WORKFLOW}/dispatches`, {
     method: 'POST',
     headers: {
-      'Authorization': 'Bearer ' + window.GH_PAT,
+      'Authorization': 'Bearer ' + pat,
       'Accept': 'application/vnd.github+json',
       'Content-Type': 'application/json'
     },

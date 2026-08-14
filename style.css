@@ -493,6 +493,48 @@ body {
   border-top: 1px dashed rgba(180,140,100,0.25);
 }
 
+/* ===== PAT setup overlay ===== */
+.pat-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 300;
+}
+.pat-box {
+  background: #fdf8ef;
+  border: 1px solid rgba(180,140,100,0.3);
+  border-radius: 12px;
+  padding: 24px 28px;
+  width: min(380px, 90vw);
+  text-align: center;
+  box-shadow: 0 12px 40px rgba(80,50,30,0.25);
+}
+.pat-title { font-size: 1.05rem; font-weight: 700; color: var(--text-dark); margin: 0 0 8px; }
+.pat-desc { font-size: 0.78rem; color: var(--text-light); margin: 0 0 14px; line-height: 1.5; }
+.pat-box input {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1px solid rgba(180,140,100,0.4);
+  border-radius: 8px;
+  font-size: 0.8rem;
+  background: #fff;
+  box-sizing: border-box;
+  margin-bottom: 14px;
+}
+.pat-btns { display: flex; gap: 10px; justify-content: center; }
+.pat-btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 20px;
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+.pat-save { background: var(--accent); color: #fff; }
+.pat-skip { background: #eee3d3; color: var(--text-light); }
+
 /* ===== Last page (left: 今天 + 天數) ===== */
 .last-left {
   width: 100%; height: 100%;
